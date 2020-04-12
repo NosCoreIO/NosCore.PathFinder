@@ -6,7 +6,7 @@
 
 namespace NosCore.PathFinder.Interfaces
 {
-    interface IDistance
+    public interface IDistance
     {
         double GetDistance(MapCell fromCell, MapCell toCell);
     }
