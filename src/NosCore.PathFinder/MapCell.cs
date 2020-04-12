@@ -8,6 +8,14 @@ namespace NosCore.PathFinder
 {
     public class MapCell
     {
+        public MapCell() { }
+
+        public MapCell(short x, short y)
+        {
+            X = x;
+            Y = y;
+        }
+
         public short X { get; set; }
         public short Y { get; set; }
     }

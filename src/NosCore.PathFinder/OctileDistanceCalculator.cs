@@ -9,7 +9,7 @@ using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder
 {
-    public class OctileDistance : IDistance
+    public class OctileDistanceCalculator : IDistanceCalculator
     {
         public readonly double Sqrt2 = Math.Sqrt(2);
 
