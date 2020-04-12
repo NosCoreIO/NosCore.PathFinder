@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\NosCore.Dao\NosCore.Dao.csproj" />
+    <ProjectReference Include="..\..\src\NosCore.PathFinder\NosCore.PathFinder.csproj" />
   </ItemGroup>
 
 </Project>
