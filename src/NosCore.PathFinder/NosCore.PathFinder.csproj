@@ -15,7 +15,7 @@
     <Version>0.0.5</Version>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>NosCore's PathFinder</Description>
-    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <PackageLicenseExpression></PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <Company>NosCore</Company>
     <PackageIcon>icon.png</PackageIcon>
