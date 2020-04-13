@@ -21,3 +21,12 @@ We are not responsible of any damages caused by bad usage of our source. Please 
 We recommend usage of : 
 * [Roslynator extension](https://github.com/JosefPihrt/Roslynator).
 * [Resharper](https://www.jetbrains.com/resharper/)
+
+## How to use the GUI ##
+* A GUI is included in this project. 
+* GUI is only working on windows and require the NosCore database to be loaded
+* GUI is not part of the shipped package. It's goal is only to visual test pathfinder with a use case 
+
+<p align="center">
+  <img src="https://media.discordapp.net/attachments/423344512866320385/699174285842972692/unknown.png"/>
+</p>
