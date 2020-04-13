@@ -14,7 +14,7 @@ namespace NosCore.PathFinder.Gui.Database
 
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Key]
-        public int MapMonsterId { get; set; }
+        public int MapNpcId { get; set; }
 
         public short MapX { get; set; }
 

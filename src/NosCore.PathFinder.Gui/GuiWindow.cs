@@ -27,12 +27,11 @@ using NosCore.Dao.Interfaces;
 using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
-using OpenToolkit.Mathematics;
-using OpenToolkit.Windowing.Desktop;
-using OpenToolkit.Windowing.Common;
-using OpenToolkit.Windowing.Common.Input;
-using OpenToolkit.Graphics.OpenGL;
 using NosCore.Dao;
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 
 namespace NosCore.PathFinder.Gui
 {
@@ -50,37 +49,38 @@ namespace NosCore.PathFinder.Gui
         private double _gridsizeX;
         private double _gridsizeY;
 
-        public GuiWindow(Map map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(
-                new GameWindowSettings
-                {
-                    IsMultiThreaded = true,
-                    RenderFrequency = 30,
-                    UpdateFrequency = 30
-                },
-                new NativeWindowSettings
-                {
-                    Size = new Vector2i(width * gridsize, height * gridsize),
-                    Title = title,
-                    API = ContextAPI.OpenGL,
-                    APIVersion = new Version(3,3)
-                })
+        public GuiWindow(MapDto map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(width * gridsize, height * gridsize, GraphicsMode.Default, title)
+        //new GameWindowSettings
+        //{
+        //    IsMultiThreaded = true,
+        //    RenderFrequency = 30,
+        //    UpdateFrequency = 30
+        //},
+        //new NativeWindowSettings
+        //{
+        //    Size = new Vector2i(width * gridsize, height * gridsize),
+        //    Title = title,
+        //    API = ContextAPI.OpenGL,
+        //    APIVersion = new Version(3,3)
+        //})
         {
             var dbContextBuilder1 = dbContextBuilder;
-            IDao<MapMonsterDto, int> mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1);
-            IDao<MapNpcDto, int> mapNpcDao = new Dao<MapNpc, MapNpcDto, int>(Logger, dbContextBuilder1);
+            var mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1);
+            var mapNpcDao = new Dao<MapNpc, MapNpcDto, int>(Logger, dbContextBuilder1);
             _originalWidth = width * gridsize;
             _originalHeight = height * gridsize;
-            _map = map.Adapt<MapDto>();
             _gridsizeX = gridsize;
             _gridsizeY = gridsize;
             _gridsize = gridsize;
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterDto>>() ?? new List<MapMonsterDto>();
+            _map = map;
 
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
                 mapMonster.PositionY = mapMonster.MapY;
                 mapMonster.Speed = 10;
+                map = _map;
             }
 
             _npcs = mapNpcDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapNpcDto>>() ?? new List<MapNpcDto>();
@@ -89,7 +89,11 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.PositionX = mapNpc.MapX;
                 mapNpc.PositionY = mapNpc.MapY;
                 mapNpc.Speed = 10;
+                map = _map;
             }
+
+            Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
+            Parallel.ForEach(_npcs.Where(s => s.Life == null), npc => npc.StartLife());
 
             GetMap();
         }
@@ -116,9 +120,9 @@ namespace NosCore.PathFinder.Gui
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.ClearColor(Color.LightSkyBlue.A, Color.LightSkyBlue.R, Color.LightSkyBlue.G, Color.LightSkyBlue.B);
-            _gridsizeX = _gridsize * (ClientRectangle.Size.X / (double)_originalWidth);
-            _gridsizeY = _gridsize * (ClientRectangle.Size.Y / (double)_originalHeight);
-            var world = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Size.X, ClientRectangle.Size.Y, 0, 0, 1);
+            _gridsizeX = _gridsize * (ClientRectangle.Width / (double)_originalWidth);
+            _gridsizeY = _gridsize * (ClientRectangle.Height / (double)_originalHeight);
+            var world = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Width, ClientRectangle.Height, 0, 0, 1);
             GL.LoadMatrix(ref world);
             foreach (var wall in _walls)
             {
@@ -127,12 +131,12 @@ namespace NosCore.PathFinder.Gui
 
             foreach (var monster in _monsters)
             {
-                DrawPixel(monster.PositionX, monster.PositionY, Color.Red);
+                DrawPixelCircle(monster.PositionX, monster.PositionY, Color.Red);
             }
 
             foreach (var npc in _npcs)
             {
-                DrawPixel(npc.PositionX, npc.PositionY, Color.Yellow);
+                DrawPixelCircle(npc.PositionX, npc.PositionY, Color.Yellow);
             }
 
             SwapBuffers();
@@ -162,6 +166,22 @@ namespace NosCore.PathFinder.Gui
             GL.Vertex2(_gridsizeX * (x + 1), _gridsizeY * (y + 1));
             GL.Vertex2(x * _gridsizeX, _gridsizeY * (y + 1));
             GL.End();
+        }
+
+        private void DrawPixelCircle(short x, short y, Color color)
+        {
+            GL.Enable(EnableCap.Blend);
+            GL.Begin(PrimitiveType.TriangleFan);
+            GL.Color3(color);
+
+            GL.Vertex2(x * _gridsizeX, y * _gridsizeY);
+            for (var i = 0; i < 360; i++)
+            {
+                GL.Vertex2(x * _gridsizeX + Math.Cos(i) * _gridsizeX, y * _gridsizeY + Math.Sin(i) * _gridsizeY);
+            }
+
+            GL.End();
+            GL.Disable(EnableCap.Blend);
         }
     }
 }

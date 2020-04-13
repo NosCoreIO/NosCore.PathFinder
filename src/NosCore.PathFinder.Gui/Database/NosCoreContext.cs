@@ -5,6 +5,7 @@
 // -----------------------------------
 
 using Microsoft.EntityFrameworkCore;
+using NosCore.Dao.Extensions;
 
 namespace NosCore.PathFinder.Gui.Database
 {

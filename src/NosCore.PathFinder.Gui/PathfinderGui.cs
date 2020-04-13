@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using OpenToolkit.Graphics.ES30;
-using OpenToolkit.Windowing.GraphicsLibraryFramework;
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
@@ -38,53 +36,43 @@ namespace NosCore.PathFinder.Gui
 {
     public static class PathFinderGui
     {
-        private const string ConfigurationPath = "\\Configuration";
         private const string Title = "NosCore - Pathfinder GUI";
         private const string ConsoleText = "PATHFINDER GUI - NosCoreIO";
         private static readonly PathfinderGuiConfiguration PathfinderGuiConfiguration = new PathfinderGuiConfiguration();
         private static readonly Dictionary<short, GuiWindow?> GuiWindows = new Dictionary<short, GuiWindow?>();
-        private static readonly ILogger Logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
         private static readonly DataAccessHelper DbContextBuilder = new DataAccessHelper();
-        private static IDao<MapDto, short> _mapDao = null!;
-
-        private static void InitializeConfiguration()
-        {
-            var builder = new ConfigurationBuilder();
-            builder
-                .SetBasePath(Directory.GetCurrentDirectory() + ConfigurationPath)
-                .AddYamlFile("pathfinder.yml", false)
-                .Build()
-                .Bind(PathfinderGuiConfiguration);
-        }
-
+   
         public static async Task Main()
         {
             try { Console.Title = Title; } catch (PlatformNotSupportedException) { }
-            InitializeConfiguration();
-            Shared.I18N.Logger.SetLoggerConfiguration(new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory() + ConfigurationPath)
+            var builder = new ConfigurationBuilder();
+            builder
+                .SetBasePath(Directory.GetCurrentDirectory() + "\\Configuration")
+                .AddYamlFile("pathfinder.yml", false)
+                .Build()
+                .Bind(PathfinderGuiConfiguration);
+            Shared.I18N.Logger.Initialize(new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory() + "\\Configuration")
                 .AddYamlFile("logger.yml", false).Build());
             Shared.I18N.Logger.PrintHeader(ConsoleText);
-
-
+            var logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
             LogLanguage.Language = PathfinderGuiConfiguration.Language;
             var optionsBuilder = new DbContextOptionsBuilder<NosCoreContext>();
             optionsBuilder.UseNpgsql(PathfinderGuiConfiguration.Database!.ConnectionString);
             DbContextBuilder.Initialize(optionsBuilder.Options);
-            _mapDao = new Dao<Map, MapDto, short>(Logger, DbContextBuilder);
+            var  mapDao = new Dao<Map, MapDto, short>(logger, DbContextBuilder);
             var distanceCalculator = new OctileDistanceCalculator();
 
             while (true)
             {
-                Logger.Information(LogLanguage.Instance.GetMessageFromKey(LogLanguageKey.SELECT_MAPID));
+                logger.Information(LogLanguage.Instance.GetMessageFromKey(LogLanguageKey.SELECT_MAPID));
                 var input = Console.ReadLine();
-                if ((input == null) || !int.TryParse(input, out var askMapId))
+                if ((input == null) || !short.TryParse(input, out var askMapId))
                 {
-                    Logger.Error(LogLanguage.Instance.GetMessageFromKey(LogLanguageKey.WRONG_SELECTED_MAPID));
+                    logger.Error(LogLanguage.Instance.GetMessageFromKey(LogLanguageKey.WRONG_SELECTED_MAPID));
                     continue;
                 }
-
-                var map = await _mapDao.FirstOrDefaultAsync(m => m.MapId == askMapId).ConfigureAwait(false);
+                var map = await mapDao.FirstOrDefaultAsync(m => m.MapId == askMapId).ConfigureAwait(false);
 
                 if ((!(map?.XLength > 0)) || (map.YLength <= 0))
                 {
@@ -96,10 +84,9 @@ namespace NosCore.PathFinder.Gui
                     GuiWindows[map.MapId]!.Close();
                 }
 
-                GL.LoadBindings(new GLFWBindingsContext());
                 GuiWindows[map.MapId] = new GuiWindow(map, 4, map.XLength, map.YLength,
                     $"NosCore Pathfinder GUI - Map {map.MapId}", DbContextBuilder);
-                GuiWindows[map.MapId]!.Run();
+                GuiWindows[map.MapId]!.Run(30);
             }
         }
     }
