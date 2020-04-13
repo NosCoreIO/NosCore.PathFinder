@@ -27,7 +27,7 @@ namespace NosCore.PathFinder.Gui.Models
         {
             get;
             set;
-        }
+        } = null!;
 
         public void StartLife()
         {

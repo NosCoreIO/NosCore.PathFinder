@@ -24,11 +24,7 @@ namespace NosCore.PathFinder.Gui.Models
         public short MapX { get; set; }
 
         public short MapY { get; set; }
-        public MapDto Map
-        {
-            get;
-            set;
-        }
+        public MapDto Map { get; set; } = null!;
 
         public IDisposable? Life { get; private set; }
 

@@ -27,7 +27,7 @@ namespace NosCore.PathFinder.Gui.Models
         {
             var time = (DateTime.Now - nonPlayableEntity.LastMove).TotalMilliseconds;
 
-            if (!(time > RandomFactory.Instance.RandomNumber(400, 3200)))
+            if (!(time > RandomHelper.Instance.RandomNumber(400, 3200)))
             {
                 return Task.CompletedTask;
             }
@@ -35,8 +35,8 @@ namespace NosCore.PathFinder.Gui.Models
             var mapX = nonPlayableEntity.MapX;
             var mapY = nonPlayableEntity.MapY;
             if (!nonPlayableEntity.Map.GetFreePosition(ref mapX, ref mapY,
-                (byte)RandomFactory.Instance.RandomNumber(0, 3),
-                (byte)RandomFactory.Instance.RandomNumber(0, 3)))
+                (byte)RandomHelper.Instance.RandomNumber(0, 3),
+                (byte)RandomHelper.Instance.RandomNumber(0, 3)))
             {
                 return Task.CompletedTask;
             }
