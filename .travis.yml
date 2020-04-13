@@ -23,14 +23,14 @@ jobs:
       name: Run tests on NosCore.PathFinder
       script:
         - dotnet restore
-        - dotnet build
+        - dotnet build test/NosCore.PathFinder.Tests/NosCore.PathFinder.Tests.csproj
         - dotnet test test/NosCore.PathFinder.Tests -v m
     - stage: release_nuget_packages
       name: Build NosCore.PathFinder package (nuget)
       if: (tag =~ /^((\d+\.)+\d+)/)
       script:
         - dotnet restore
-        - dotnet build -c Release
+        - dotnet build src/NosCore.PathFinder/NosCore.PathFinder.csproj -c Release
         - dotnet pack -c Release -o /tmp/nupkgs -v m -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
       deploy:
         provider: script
@@ -44,7 +44,7 @@ jobs:
       if: (tag =~ /^((\d+\.)+\d+)/)
       script:
         - dotnet restore
-        - dotnet build -c Release
+        - dotnet build src/NosCore.PathFinder/NosCore.PathFinder.csproj -c Release
         - dotnet pack -c Release -o /tmp/nupkgs -v m
       deploy:
         provider: releases
