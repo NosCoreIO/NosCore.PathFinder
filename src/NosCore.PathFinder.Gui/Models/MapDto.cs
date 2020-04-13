@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NosCore.PathFinder.Gui.Database;
+using NosCore.Shared.Helpers;
 
 namespace NosCore.PathFinder.Gui.Models
 {

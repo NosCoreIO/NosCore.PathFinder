@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Text;
+using Mapster;
 using NosCore.PathFinder.Gui.Database;
 
 namespace NosCore.PathFinder.Gui.Models
@@ -22,7 +23,8 @@ namespace NosCore.PathFinder.Gui.Models
 
         public short MapY { get; set; }
 
-        public IDisposable? Life { get; private set; }
+        [AdaptIgnore]
+        public IDisposable? Life { get; set; }
         public MapDto Map
         {
             get;

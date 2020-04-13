@@ -50,19 +50,6 @@ namespace NosCore.PathFinder.Gui
         private double _gridsizeY;
 
         public GuiWindow(MapDto map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(width * gridsize, height * gridsize, GraphicsMode.Default, title)
-        //new GameWindowSettings
-        //{
-        //    IsMultiThreaded = true,
-        //    RenderFrequency = 30,
-        //    UpdateFrequency = 30
-        //},
-        //new NativeWindowSettings
-        //{
-        //    Size = new Vector2i(width * gridsize, height * gridsize),
-        //    Title = title,
-        //    API = ContextAPI.OpenGL,
-        //    APIVersion = new Version(3,3)
-        //})
         {
             var dbContextBuilder1 = dbContextBuilder;
             var mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1);
@@ -80,7 +67,7 @@ namespace NosCore.PathFinder.Gui
                 mapMonster.PositionX = mapMonster.MapX;
                 mapMonster.PositionY = mapMonster.MapY;
                 mapMonster.Speed = 10;
-                map = _map;
+                mapMonster.Map = _map;
             }
 
             _npcs = mapNpcDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapNpcDto>>() ?? new List<MapNpcDto>();
@@ -89,7 +76,7 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.PositionX = mapNpc.MapX;
                 mapNpc.PositionY = mapNpc.MapY;
                 mapNpc.Speed = 10;
-                map = _map;
+                mapNpc.Map = _map;
             }
 
             Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
