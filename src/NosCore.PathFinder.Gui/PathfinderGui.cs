@@ -18,6 +18,7 @@ using NosCore.PathFinder.Gui.I18N;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
+using NosCore.Shared.Configuration;
 
 namespace NosCore.PathFinder.Gui
 {
@@ -29,18 +30,10 @@ namespace NosCore.PathFinder.Gui
         private static readonly Dictionary<short, GuiWindow?> GuiWindows = new Dictionary<short, GuiWindow?>();
         private static readonly DataAccessHelper DbContextBuilder = new DataAccessHelper();
    
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
             try { Console.Title = Title; } catch (PlatformNotSupportedException) { }
-            var builder = new ConfigurationBuilder();
-            builder
-                .SetBasePath(Directory.GetCurrentDirectory() + "\\Configuration")
-                .AddYamlFile("pathfinder.yml", false)
-                .Build()
-                .Bind(PathfinderGuiConfiguration);
-            Shared.I18N.Logger.Initialize(new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory() + "\\Configuration")
-                .AddYamlFile("logger.yml", false).Build());
+            ConfiguratorBuilder.InitializeConfiguration(args, new[] { "pathfinder.yml", "logger.yml" }, PathfinderGuiConfiguration);
             Shared.I18N.Logger.PrintHeader(ConsoleText);
             var logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
             LogLanguage.Language = PathfinderGuiConfiguration.Language;
