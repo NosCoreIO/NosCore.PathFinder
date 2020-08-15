@@ -12,14 +12,14 @@ namespace NosCore.PathFinder
     {
         public Node(short x, short y, byte value)
         {
-            Cell = new Cell
+            ValuedCell = new ValuedCell
             {
                 Value = value,
                 X = x,
                 Y = y,
             };
         }
-        public Cell Cell { get; set; }
+        public ValuedCell ValuedCell { get; set; }
 
         public double F { get; internal set; }
 

@@ -41,7 +41,7 @@ namespace NosCore.PathFinder.Tests
 
         private readonly IPathfinder _goalPathfinder;
         private readonly Cell _characterPosition;
-        private readonly Cell?[,] _brushFire;
+        private readonly ValuedCell?[,] _brushFire;
 
         public GoalBasedPathfinderTests()
         {

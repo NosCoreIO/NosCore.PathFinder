@@ -8,10 +8,10 @@ namespace NosCore.PathFinder
 {
     public class GoalBasedPathfinder : IPathfinder
     {
-        private readonly Cell?[,] _brushFire;
+        private readonly ValuedCell?[,] _brushFire;
         private readonly IMapGrid _mapGrid;
 
-        public GoalBasedPathfinder(Cell?[,] brushFire, IMapGrid mapGrid)
+        public GoalBasedPathfinder(ValuedCell?[,] brushFire, IMapGrid mapGrid)
         {
             _brushFire = brushFire;
             _mapGrid = mapGrid;
@@ -31,10 +31,10 @@ namespace NosCore.PathFinder
             if (!(_brushFire[end.X, end.Y] is { } currentnode)) return list;
             while (currentnode.Value > 1)
             {
-                var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new Cell(s.X, s.Y, _brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault();
+                var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new ValuedCell(s.X, s.Y, _brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault();
                 if (newnode is { } cell)
                 {
-                    list.Add(cell);
+                    list.Add(new Cell(cell.X, cell.Y));
                     currentnode = cell;
                 }
             }

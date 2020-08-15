@@ -13,10 +13,10 @@ namespace NosCore.PathFinder
     {
         public readonly double Sqrt2 = Math.Sqrt(2);
 
-        public double GetDistance(Cell fromCell, Cell toCell)
+        public double GetDistance(ValuedCell fromValuedCell, ValuedCell toValuedCell)
         {
-            var iDx = Math.Abs(fromCell.X - toCell.X);
-            var iDy = Math.Abs(fromCell.Y - toCell.Y);
+            var iDx = Math.Abs(fromValuedCell.X - toValuedCell.X);
+            var iDy = Math.Abs(fromValuedCell.Y - toValuedCell.Y);
             var min = Math.Min(iDx, iDy);
             var max = Math.Max(iDx, iDy);
             return min * Sqrt2 + max - min;

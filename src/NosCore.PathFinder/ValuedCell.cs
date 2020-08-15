@@ -10,9 +10,9 @@ using System.Security.Cryptography.X509Certificates;
 namespace NosCore.PathFinder
 {
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    public struct Cell
+    public struct ValuedCell
     {
-        public Cell(short x, short y, double value = 0)
+        public ValuedCell(short x, short y, double value = 0)
         {
             X = x;
             Y = y;
@@ -24,5 +24,19 @@ namespace NosCore.PathFinder
         public short Y { get; set; }
 
         public double Value { get; set; }
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    public struct Cell 
+    {
+        public Cell(short x, short y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        public short X { get; set; }
+
+        public short Y { get; set; }
     }
 }

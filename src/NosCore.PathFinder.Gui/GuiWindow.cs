@@ -51,7 +51,7 @@ namespace NosCore.PathFinder.Gui
             _gridsize = gridsize;
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterDto>>() ?? new List<MapMonsterDto>();
             _map = map;
-            _mouseCharacter = new Character { BrushFire = new Cell?[_map.XLength, _map.YLength] };
+            _mouseCharacter = new Character { BrushFire = new ValuedCell?[_map.XLength, _map.YLength] };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
