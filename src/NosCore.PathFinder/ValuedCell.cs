@@ -25,7 +25,7 @@ namespace NosCore.PathFinder
 
         public double Value { get; set; }
 
-        public static explicit operator Cell(ValuedCell value)
+        public static implicit operator Cell(ValuedCell value)
         {
             return value._cell;
         }
