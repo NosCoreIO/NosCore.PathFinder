@@ -91,7 +91,7 @@ namespace NosCore.PathFinder.Tests
             builder.AppendLine("- Filename: brushfire.png");
             var checksum = string.Join("",
                 SHA256.Create()
-                    .ComputeHash(listPixel.SelectMany(s => Encoding.UTF8.GetBytes($"{s.A}{s.R}{s.G}{s.B}")).ToArray())
+                    .ComputeHash(Encoding.UTF8.GetBytes(string.Join("", listPixel.SelectMany(s => $"{s.A}{s.R}{s.G}{s.B}"))))
                     .Select(s => s.ToString("x2")));
             Console.WriteLine(checksum);
             builder.AppendLine($"- Checksum: {checksum}");
