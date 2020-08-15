@@ -9,11 +9,11 @@ using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder
 {
-    public class OctileDistanceCalculator : IDistanceCalculator
+    public class OctileDistanceHeuristic : IHeuristic
     {
         public readonly double Sqrt2 = Math.Sqrt(2);
 
-        public double GetDistance(MapCell fromCell, MapCell toCell)
+        public double GetDistance(Cell fromCell, Cell toCell)
         {
             var iDx = Math.Abs(fromCell.X - toCell.X);
             var iDy = Math.Abs(fromCell.Y - toCell.Y);
