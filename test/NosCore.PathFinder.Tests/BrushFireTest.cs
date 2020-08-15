@@ -89,11 +89,13 @@ namespace NosCore.PathFinder.Tests
             builder.AppendLine("# NosCore.Pathfinder's Documentation");
             builder.AppendLine("## Brushfire");
             builder.AppendLine("- Filename: brushfire.png");
-            var checksum = string.Join("",
-                SHA256.Create()
-                    .ComputeHash(Encoding.UTF8.GetBytes(string.Join("", listPixel.SelectMany(s => $"{s.A}{s.R}{s.G}{s.B}"))))
-                    .Select(s => s.ToString("x2")));
+            var pixels = string.Join("", listPixel.SelectMany(s => $"{s.A}{s.R}{s.G}{s.B}"));
+               
+            var checksum =
+                string.Join("", SHA256.Create()
+                    .ComputeHash(Encoding.UTF8.GetBytes(pixels)).Select(s => s.ToString("x2")));
             Console.WriteLine(checksum);
+            Console.WriteLine(pixels);
             builder.AppendLine($"- Checksum: {checksum}");
             builder.AppendLine("![brushfire](./brushfire.png)");
             Approvals.Verify(WriterFactory.CreateTextWriter(builder.ToString(), "md"));
