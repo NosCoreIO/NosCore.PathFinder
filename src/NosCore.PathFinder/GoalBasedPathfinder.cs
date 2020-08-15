@@ -34,7 +34,7 @@ namespace NosCore.PathFinder
                 var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new ValuedCell(s.X, s.Y, _brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault();
                 if (newnode is { } cell)
                 {
-                    list.Add(new Cell(cell.X, cell.Y));
+                    list.Add((Cell)cell);
                     currentnode = cell;
                 }
             }

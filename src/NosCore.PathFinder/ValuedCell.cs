@@ -24,6 +24,11 @@ namespace NosCore.PathFinder
         public short Y { get; set; }
 
         public double Value { get; set; }
+
+        public static explicit operator ValuedCell(Cell value)
+        {
+            return new ValuedCell(value.X, value.Y);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -38,5 +43,10 @@ namespace NosCore.PathFinder
         public short X { get; set; }
 
         public short Y { get; set; }
+
+        public static explicit operator Cell(ValuedCell value)
+        {
+            return new Cell(value.X, value.Y);
+        }
     }
 }

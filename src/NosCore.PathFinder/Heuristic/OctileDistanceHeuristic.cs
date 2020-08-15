@@ -13,7 +13,7 @@ namespace NosCore.PathFinder
     {
         public readonly double Sqrt2 = Math.Sqrt(2);
 
-        public double GetDistance(ValuedCell fromValuedCell, ValuedCell toValuedCell)
+        public double GetDistance(Cell fromValuedCell, Cell toValuedCell)
         {
             var iDx = Math.Abs(fromValuedCell.X - toValuedCell.X);
             var iDy = Math.Abs(fromValuedCell.Y - toValuedCell.Y);
