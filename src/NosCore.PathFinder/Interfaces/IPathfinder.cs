@@ -10,6 +10,6 @@ namespace NosCore.PathFinder.Interfaces
 {
     public interface IPathfinder
     {
-        IEnumerable<MapCell> FindPath(MapCell start, MapCell end);
+        IEnumerable<Cell> FindPath(Cell start, Cell end);
     }
 }

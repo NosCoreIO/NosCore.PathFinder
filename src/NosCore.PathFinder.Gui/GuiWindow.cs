@@ -51,7 +51,7 @@ namespace NosCore.PathFinder.Gui
             _gridsize = gridsize;
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterDto>>() ?? new List<MapMonsterDto>();
             _map = map;
-            _mouseCharacter = new Character { BrushFire = new Node[_map.XLength, _map.YLength] };
+            _mouseCharacter = new Character { BrushFire = new Cell?[_map.XLength, _map.YLength] };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -98,8 +98,8 @@ namespace NosCore.PathFinder.Gui
 
             _mouseCharacter.MapX = (short)(e.X / _gridsize);
             _mouseCharacter.MapY = (short)(e.Y / _gridsize);
-            _mouseCharacter.BrushFire = _map.LoadBrushFire(new MapCell(_mouseCharacter.MapX, _mouseCharacter.MapY),
-                new OctileHeuristic());
+            _mouseCharacter.BrushFire = _map.LoadBrushFire(new Cell(_mouseCharacter.MapX, _mouseCharacter.MapY),
+                new OctileDistanceHeuristic());
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -119,9 +119,9 @@ namespace NosCore.PathFinder.Gui
             {
                 for (short x = 0; x < _map.XLength; x++)
                 {
-                    if ((_mouseCharacter.BrushFire[x, y]?.F ?? 0) != 0)
+                    if (!Equals(_mouseCharacter.BrushFire[x, y]?.Value ?? 0d, 0d))
                     {
-                        var alpha = 255 - _mouseCharacter.BrushFire[x, y].F * 10;
+                        var alpha = 255 - _mouseCharacter.BrushFire[x, y]?.Value ?? 0 * 10;
                         if (alpha < 0)
                         {
                             alpha = 0;

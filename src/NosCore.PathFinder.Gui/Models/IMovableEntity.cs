@@ -30,7 +30,7 @@ namespace NosCore.PathFinder.Gui.Models
 
     public static class IMovableEntityExtension
     {
-        public static Task MoveAsync(this IMovableEntity nonPlayableEntity, IDistanceCalculator distanceCalculator)
+        public static Task MoveAsync(this IMovableEntity nonPlayableEntity, IHeuristic distanceCalculator)
         {
             var time = (DateTime.Now - nonPlayableEntity.LastMove).TotalMilliseconds;
 
@@ -48,7 +48,7 @@ namespace NosCore.PathFinder.Gui.Models
                 return Task.CompletedTask;
             }
 
-            var distance = (int)distanceCalculator.GetDistance(new MapCell(nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), new MapCell(mapX, mapY));
+            var distance = (int)distanceCalculator.GetDistance(new Cell(nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), new Cell(mapX, mapY));
             var value = 1000d * distance / (2 * nonPlayableEntity.Speed);
             Observable.Timer(TimeSpan.FromMilliseconds(value))
                 .Subscribe(

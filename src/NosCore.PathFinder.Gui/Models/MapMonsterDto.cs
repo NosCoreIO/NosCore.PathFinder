@@ -39,7 +39,7 @@ namespace NosCore.PathFinder.Gui.Models
 
         public void StartLife()
         {
-            Life = Observable.Interval(TimeSpan.FromMilliseconds(400)).Select(_ => this.MoveAsync(new OctileDistanceCalculator())).Subscribe();
+            Life = Observable.Interval(TimeSpan.FromMilliseconds(400)).Select(_ => this.MoveAsync(new OctileDistanceHeuristic())).Subscribe();
         }
     }
 }

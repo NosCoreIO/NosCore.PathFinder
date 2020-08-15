@@ -4,17 +4,25 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+
 namespace NosCore.PathFinder
 {
-    public class MapCell
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
+    public struct Cell
     {
-        public MapCell(short x, short y)
+        public Cell(short x, short y, double value = 0)
         {
             X = x;
             Y = y;
+            Value = value;
         }
 
         public short X { get; set; }
+
         public short Y { get; set; }
+
+        public double Value { get; set; }
     }
 }

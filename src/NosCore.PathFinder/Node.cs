@@ -8,23 +8,24 @@ using System;
 
 namespace NosCore.PathFinder
 {
-    public class Node : MapCell, IComparable<Node>
+    public class Node : IComparable<Node>
     {
-        public Node(short x, short y, byte value) : base(x, y)
+        public Node(short x, short y, byte value)
         {
-            Value = value;
+            Cell = new Cell
+            {
+                Value = value,
+                X = x,
+                Y = y,
+            };
         }
-
-        public byte Value { get; set; }
+        public Cell Cell { get; set; }
 
         public double F { get; internal set; }
 
         public bool Opened { get; internal set; }
 
-        public Node? Parent { get; internal set; }
-
         public bool Closed { get; internal set; }
-
 
         public int CompareTo(Node other)
         {

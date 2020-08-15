@@ -15,7 +15,7 @@ using NosCore.PathFinder.Interfaces;
 namespace NosCore.PathFinder.Tests
 {
     [TestClass]
-    public class BrushFireTest
+    public class BrushFireTests
     {
         private TestMap _map = new TestMap(new[]
         {
@@ -44,8 +44,8 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_BrushFire()
         {
-            var characterPosition = new MapCell(6, 10);
-            var brushFire = _map.LoadBrushFire(characterPosition, new OctileHeuristic());
+            var characterPosition = new Cell(6, 10);
+            var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
             var scale = 50;
             var bitmap = new Bitmap(_map.XLength * scale, _map.YLength * scale);
             using var graphics = Graphics.FromImage(bitmap);
@@ -54,7 +54,7 @@ namespace NosCore.PathFinder.Tests
             {
                 for (var x = 0; x < _map.XLength; x++)
                 {
-                    var color = (brushFire[x, y]?.F ?? 0) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)((brushFire[x, y].F * 12 > 255 ? 255 : brushFire[x, y].F * 12)), 0, 0, 255);
+                    var color = (brushFire[x, y]?.Value ?? 0d) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(((brushFire[x, y]?.Value ?? 0) * 12 > 255 ? 255 : (brushFire[x, y]?.Value ?? 0) * 12)), 0, 0, 255);
                     if (x == characterPosition.X && y == characterPosition.Y)
                     {
                         color = Color.DarkRed;
@@ -65,7 +65,7 @@ namespace NosCore.PathFinder.Tests
                         Alignment = StringAlignment.Center
                     };
                     var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
-                    graphics.DrawString(brushFire[x, y]?.F.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
+                    graphics.DrawString(brushFire[x, y]?.Value.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
                     graphics.FillRectangle(new Pen(color).Brush, rectangle);
                     listPixel.Add(color);
                 }
