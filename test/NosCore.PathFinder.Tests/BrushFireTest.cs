@@ -82,7 +82,7 @@ namespace NosCore.PathFinder.Tests
             builder.AppendLine("## Brushfire");
             builder.AppendLine("Filename: brushfire.png");
             builder.AppendLine($"SHA256: {string.Join("", SHA256.Create().ComputeHash(stream).Select(s => s.ToString("x2")))}");
-            builder.AppendLine("![brushfire](brushfire.png)");
+            builder.AppendLine("![brushfire](./documentation/brushfire.png)");
             Approvals.Verify(WriterFactory.CreateTextWriter(builder.ToString(), "md"));
         }
     }
