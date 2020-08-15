@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Mapster;
 using NosCore.PathFinder.Gui.Database;
+using NosCore.PathFinder.Infrastructure;
 
 namespace NosCore.PathFinder.Gui.Models
 {
@@ -20,6 +21,6 @@ namespace NosCore.PathFinder.Gui.Models
 
         public short MapY { get; set; }
 
-        public ValuedCell?[,] BrushFire { get; set; } = default!;
+        public BrushFire BrushFire { get; set; }
     }
 }

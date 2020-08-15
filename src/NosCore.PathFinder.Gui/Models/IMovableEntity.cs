@@ -7,6 +7,7 @@
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 using NosCore.Shared.Helpers;
 

@@ -15,6 +15,8 @@ using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
+using NosCore.PathFinder.Heuristic;
+using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 using OpenTK;
 using OpenTK.Graphics;
@@ -51,7 +53,7 @@ namespace NosCore.PathFinder.Gui
             _gridsize = gridsize;
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterDto>>() ?? new List<MapMonsterDto>();
             _map = map;
-            _mouseCharacter = new Character { BrushFire = new ValuedCell?[_map.XLength, _map.YLength] };
+            _mouseCharacter = new Character { BrushFire = new BrushFire(new Cell(), 0, new ValuedCell?[_map.XLength, _map.YLength]) };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -107,8 +109,6 @@ namespace NosCore.PathFinder.Gui
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.ClearColor(Color.LightSkyBlue.A, Color.LightSkyBlue.R, Color.LightSkyBlue.G, Color.LightSkyBlue.B);
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             _gridsizeX = _gridsize * (ClientRectangle.Width / (double)_originalWidth);
             _gridsizeY = _gridsize * (ClientRectangle.Height / (double)_originalHeight);
             var world = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Width, ClientRectangle.Height, 0, 0, 1);
@@ -121,7 +121,7 @@ namespace NosCore.PathFinder.Gui
                 {
                     if (!Equals(_mouseCharacter.BrushFire[x, y]?.Value ?? 0d, 0d))
                     {
-                        var alpha = 255 - _mouseCharacter.BrushFire[x, y]?.Value ?? 0 * 10;
+                        var alpha = 255 - ((_mouseCharacter.BrushFire[x, y]?.Value ?? 0) * 10);
                         if (alpha < 0)
                         {
                             alpha = 0;
@@ -169,6 +169,8 @@ namespace NosCore.PathFinder.Gui
 
         private void DrawPixel(short x, short y, Color color)
         {
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Begin(PrimitiveType.Quads);
             GL.Color4(color);
             GL.Vertex2(x * _gridsizeX, y * _gridsizeY);
@@ -176,13 +178,15 @@ namespace NosCore.PathFinder.Gui
             GL.Vertex2(_gridsizeX * (x + 1), _gridsizeY * (y + 1));
             GL.Vertex2(x * _gridsizeX, _gridsizeY * (y + 1));
             GL.End();
+            GL.Disable(EnableCap.Blend);
         }
 
         private void DrawPixelCircle(short x, short y, Color color)
         {
             GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Begin(PrimitiveType.TriangleFan);
-            GL.Color3(color);
+            GL.Color4(color);
 
             GL.Vertex2(x * _gridsizeX, y * _gridsizeY);
             for (var i = 0; i < 360; i++)

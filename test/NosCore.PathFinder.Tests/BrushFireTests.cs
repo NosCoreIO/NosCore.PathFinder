@@ -10,6 +10,8 @@ using ApprovalTests;
 using ApprovalTests.Writers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using NosCore.PathFinder.Heuristic;
+using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Tests

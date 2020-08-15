@@ -5,9 +5,10 @@
 // -----------------------------------
 
 using System;
+using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 
-namespace NosCore.PathFinder
+namespace NosCore.PathFinder.Heuristic
 {
     public class OctileDistanceHeuristic : IHeuristic
     {

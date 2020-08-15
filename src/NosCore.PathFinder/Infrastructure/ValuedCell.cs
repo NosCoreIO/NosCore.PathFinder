@@ -5,9 +5,8 @@
 // -----------------------------------
 
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
-namespace NosCore.PathFinder
+namespace NosCore.PathFinder.Infrastructure
 {
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
     public struct ValuedCell

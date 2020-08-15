@@ -10,6 +10,7 @@ using System.Reactive.Linq;
 using System.Text;
 using Mapster;
 using NosCore.PathFinder.Gui.Database;
+using NosCore.PathFinder.Heuristic;
 
 namespace NosCore.PathFinder.Gui.Models
 {

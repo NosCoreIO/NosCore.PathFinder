@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using NosCore.PathFinder.Interfaces;
 
-namespace NosCore.PathFinder
+namespace NosCore.PathFinder.Infrastructure
 {
     public static class IMapGridExtension
     {
@@ -36,12 +33,12 @@ namespace NosCore.PathFinder
             return freeNeighbors;
         }
 
-        public static ValuedCell?[,] LoadBrushFire(this IMapGrid mapGrid, Cell user, IHeuristic heuristic, short maxDistance = 22)
+        public static BrushFire LoadBrushFire(this IMapGrid mapGrid, Cell user, IHeuristic heuristic, short maxDistance = 22)
         {
             if (user.X < 0 || user.X >= mapGrid.XLength ||
                 user.Y < 0 || user.Y >= mapGrid.YLength)
             {
-                return new ValuedCell?[mapGrid.XLength, mapGrid.YLength];
+                return new BrushFire(user, maxDistance, new ValuedCell?[mapGrid.XLength, mapGrid.YLength]);
             }
 
             var path = new MinHeap();
@@ -87,7 +84,7 @@ namespace NosCore.PathFinder
                     neighbors[i].Opened = true;
                 }
             }
-            return cellGrid;
+            return new BrushFire(user, maxDistance, cellGrid);
         }
 
     }

@@ -18,6 +18,7 @@ using NosCore.PathFinder.Gui.I18N;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
+using NosCore.PathFinder.Heuristic;
 using NosCore.Shared.Configuration;
 
 namespace NosCore.PathFinder.Gui
