@@ -1,5 +1,5 @@
 # NosCore.Pathfinder's Documentation
 ## Brushfire
-Filename: brushfire.png
-SHA256: b929716bd1195cc421556647bd79ba09ba2274cf5b5a31259c95f13de942b8e3
+- Filename: brushfire.png
+- Checksum: 3adf99d7ec6e150701174a3d60a02d33a575a6c27be610e0ef17a66790b0cbc6
 ![brushfire](./brushfire.png)
