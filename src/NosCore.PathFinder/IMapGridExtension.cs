@@ -70,7 +70,7 @@ namespace NosCore.PathFinder
                 {
                     if (Equals(neighbors[i].F, 0d))
                     {
-                        var distance = heuristic.GetDistance((Cell)neighbors[i].ValuedCell, (Cell)cell.ValuedCell) + cell.F;
+                        var distance = heuristic.GetDistance(neighbors[i].ValuedCell, cell.ValuedCell) + cell.F;
                         if (distance > maxDistance)
                         {
                             //too far count as a wall
