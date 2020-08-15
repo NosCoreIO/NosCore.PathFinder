@@ -80,8 +80,10 @@ namespace NosCore.PathFinder.Tests
             var builder = new StringBuilder();
             builder.AppendLine("# NosCore.Pathfinder's Documentation");
             builder.AppendLine("## Brushfire");
-            builder.AppendLine("Filename: brushfire.png");
-            builder.AppendLine($"SHA256: {string.Join("", SHA256.Create().ComputeHash(stream).Select(s => s.ToString("x2")))}");
+            builder.AppendLine("- Filename: brushfire.png");
+            using MemoryStream ms = new MemoryStream();
+            bitmap.Save(ms, ImageFormat.Bmp);
+            builder.AppendLine($"- BMP SHA256: {string.Join("", SHA256.Create().ComputeHash(ms.ToArray()).Select(s => s.ToString("x2")))}");
             builder.AppendLine("![brushfire](./brushfire.png)");
             Approvals.Verify(WriterFactory.CreateTextWriter(builder.ToString(), "md"));
         }
