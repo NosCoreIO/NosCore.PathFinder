@@ -19,8 +19,7 @@
     <PackageReference Include="NosCore.Dao" Version="1.2.0" />
     <PackageReference Include="NosCore.Shared" Version="1.5.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.3" />
-    <PackageReference Include="OpenTK" Version="3.2.0" />
-    <PackageReference Include="OpenTK.GLControl" Version="3.1.0" />
+    <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.22" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>
 
@@ -39,6 +38,21 @@
 
   <ItemGroup>
     <Folder Include="Resource\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resource\LocalizedResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LocalizedResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resource\LocalizedResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>LocalizedResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

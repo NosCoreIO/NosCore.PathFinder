@@ -9,11 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NosCore.PathFinder.Gui.Database;
+using NosCore.PathFinder.Interfaces;
 using NosCore.Shared.Helpers;
 
 namespace NosCore.PathFinder.Gui.Models
 {
-    public class MapDto
+    public class MapDto : IMapGrid
     {
         public byte[] Data { get; set; } = null!;
 
@@ -66,7 +67,7 @@ namespace NosCore.PathFinder.Gui.Models
                 {
                     if ((x != firstX) || (y != firstY))
                     {
-                        cells.Add(new MapCell { X = x, Y = y });
+                        cells.Add(new MapCell(x, y));
                     }
                 }
             }

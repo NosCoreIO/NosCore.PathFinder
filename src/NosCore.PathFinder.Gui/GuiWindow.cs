@@ -15,10 +15,12 @@ using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
+using NosCore.PathFinder.Interfaces;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using Color = OpenTK.Color;
 
 namespace NosCore.PathFinder.Gui
 {
@@ -35,6 +37,7 @@ namespace NosCore.PathFinder.Gui
         private readonly List<Tuple<short, short, byte>> _walls = new List<Tuple<short, short, byte>>();
         private double _gridsizeX;
         private double _gridsizeY;
+        private Character _mouseCharacter;
 
         public GuiWindow(MapDto map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(width * gridsize, height * gridsize, GraphicsMode.Default, title)
         {
@@ -48,7 +51,7 @@ namespace NosCore.PathFinder.Gui
             _gridsize = gridsize;
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterDto>>() ?? new List<MapMonsterDto>();
             _map = map;
-
+            _mouseCharacter = new Character { BrushFire = new Node[_map.XLength, _map.YLength] };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -89,15 +92,47 @@ namespace NosCore.PathFinder.Gui
             }
         }
 
+        protected override void OnMouseMove(MouseMoveEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            _mouseCharacter.MapX = (short)(e.X / _gridsize);
+            _mouseCharacter.MapY = (short)(e.Y / _gridsize);
+            _mouseCharacter.BrushFire = _map.LoadBrushFire(new MapCell(_mouseCharacter.MapX, _mouseCharacter.MapY),
+                new OctileHeuristic());
+        }
+
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.ClearColor(Color.LightSkyBlue.A, Color.LightSkyBlue.R, Color.LightSkyBlue.G, Color.LightSkyBlue.B);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             _gridsizeX = _gridsize * (ClientRectangle.Width / (double)_originalWidth);
             _gridsizeY = _gridsize * (ClientRectangle.Height / (double)_originalHeight);
             var world = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Width, ClientRectangle.Height, 0, 0, 1);
             GL.LoadMatrix(ref world);
+
+            //draw brushfire
+            for (short y = 0; y < _map.YLength; y++)
+            {
+                for (short x = 0; x < _map.XLength; x++)
+                {
+                    if ((_mouseCharacter.BrushFire[x, y]?.F ?? 0) != 0)
+                    {
+                        var alpha = 255 - _mouseCharacter.BrushFire[x, y].F * 10;
+                        if (alpha < 0)
+                        {
+                            alpha = 0;
+                        }
+                        DrawPixel(x, y, Color.FromArgb((int)(alpha), 0, 255, 0));
+                    }
+                }
+            }
+
+            DrawPixelCircle(_mouseCharacter.MapX, _mouseCharacter.MapY, Color.BlueViolet);
+
             foreach (var wall in _walls)
             {
                 DrawPixel(wall.Item1, wall.Item2, Color.Blue); //TODO iswalkable
@@ -112,6 +147,7 @@ namespace NosCore.PathFinder.Gui
             {
                 DrawPixelCircle(npc.PositionX, npc.PositionY, Color.Yellow);
             }
+
 
             SwapBuffers();
         }
@@ -134,7 +170,7 @@ namespace NosCore.PathFinder.Gui
         private void DrawPixel(short x, short y, Color color)
         {
             GL.Begin(PrimitiveType.Quads);
-            GL.Color3(color);
+            GL.Color4(color);
             GL.Vertex2(x * _gridsizeX, y * _gridsizeY);
             GL.Vertex2(_gridsizeX * (x + 1), y * _gridsizeY);
             GL.Vertex2(_gridsizeX * (x + 1), _gridsizeY * (y + 1));
