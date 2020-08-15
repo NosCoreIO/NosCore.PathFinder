@@ -14,20 +14,25 @@ namespace NosCore.PathFinder
     {
         public ValuedCell(short x, short y, double value = 0)
         {
-            X = x;
-            Y = y;
+            _cell = new Cell(x, y);
             Value = value;
         }
 
-        public short X { get; set; }
+        private readonly Cell _cell;
+        public short X => _cell.X;
 
-        public short Y { get; set; }
+        public short Y => _cell.Y;
 
         public double Value { get; set; }
+
+        public static explicit operator Cell(ValuedCell value)
+        {
+            return value._cell;
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct Cell 
+    public struct Cell
     {
         public Cell(short x, short y)
         {

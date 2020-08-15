@@ -9,10 +9,10 @@ namespace NosCore.PathFinder
 {
     public static class IMapGridExtension
     {
-        private static readonly List<ValuedCell> Neighbours = new List<ValuedCell> {
-            new ValuedCell(-1, -1),  new ValuedCell(0, -1),  new ValuedCell(1, -1),
-            new ValuedCell(-1, 0), new ValuedCell(1, 0),
-            new ValuedCell(-1, 1),  new ValuedCell(0, 1),  new ValuedCell(1, 1)
+        private static readonly List<Cell> Neighbours = new List<Cell> {
+            new Cell(-1, -1),  new Cell(0, -1),  new Cell(1, -1),
+            new Cell(-1, 0), new Cell(1, 0),
+            new Cell(-1, 1),  new Cell(0, 1),  new Cell(1, 1)
         };
 
         public static List<Cell> GetNeighbors(this IMapGrid grid, ValuedCell valuedCell)
@@ -70,7 +70,7 @@ namespace NosCore.PathFinder
                 {
                     if (Equals(neighbors[i].F, 0d))
                     {
-                        var distance = heuristic.GetDistance(neighbors[i].ValuedCell, cell.ValuedCell) + cell.F;
+                        var distance = heuristic.GetDistance((Cell)neighbors[i].ValuedCell, (Cell)cell.ValuedCell) + cell.F;
                         if (distance > maxDistance)
                         {
                             //too far count as a wall

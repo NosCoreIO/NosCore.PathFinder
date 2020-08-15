@@ -48,7 +48,7 @@ namespace NosCore.PathFinder.Gui.Models
                 return Task.CompletedTask;
             }
 
-            var distance = (int)distanceCalculator.GetDistance(new ValuedCell(nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), new ValuedCell(mapX, mapY));
+            var distance = (int)distanceCalculator.GetDistance(new Cell(nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), new Cell(mapX, mapY));
             var value = 1000d * distance / (2 * nonPlayableEntity.Speed);
             Observable.Timer(TimeSpan.FromMilliseconds(value))
                 .Subscribe(
