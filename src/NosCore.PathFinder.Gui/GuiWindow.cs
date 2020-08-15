@@ -37,7 +37,7 @@ namespace NosCore.PathFinder.Gui
         private readonly List<Tuple<short, short, byte>> _walls = new List<Tuple<short, short, byte>>();
         private double _gridsizeX;
         private double _gridsizeY;
-        private Character _mouseCharacter;
+        private readonly Character _mouseCharacter;
 
         public GuiWindow(MapDto map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(width * gridsize, height * gridsize, GraphicsMode.Default, title)
         {

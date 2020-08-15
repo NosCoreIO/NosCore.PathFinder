@@ -17,7 +17,7 @@ namespace NosCore.PathFinder.Tests
     [TestClass]
     public class BrushFireTests
     {
-        private TestMap _map = new TestMap(new[]
+        private readonly TestMap _map = new TestMap(new[]
         {
             new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
