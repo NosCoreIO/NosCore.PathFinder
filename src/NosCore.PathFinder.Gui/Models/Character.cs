@@ -20,6 +20,6 @@ namespace NosCore.PathFinder.Gui.Models
 
         public short MapY { get; set; }
 
-        public Cell?[,] BrushFire { get; set; } = default!;
+        public ValuedCell?[,] BrushFire { get; set; } = default!;
     }
 }
