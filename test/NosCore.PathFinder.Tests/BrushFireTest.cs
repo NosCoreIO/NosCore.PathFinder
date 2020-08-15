@@ -54,7 +54,7 @@ namespace NosCore.PathFinder.Tests
             {
                 for (var x = 0; x < _map.XLength; x++)
                 {
-                    var color = (brushFire[x, y]?.F ?? 0) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(255 / (brushFire[x, y].F / 5 + 1)), 0, 0, 255);
+                    var color = (brushFire[x, y]?.F ?? 0) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)((brushFire[x, y].F * 12 > 255 ? 255 : brushFire[x, y].F * 12)), 0, 0, 255);
                     if (x == characterPosition.X && y == characterPosition.Y)
                     {
                         color = Color.DarkRed;
@@ -79,7 +79,7 @@ namespace NosCore.PathFinder.Tests
             builder.AppendLine("## Brushfire");
             builder.AppendLine("- Filename: brushfire.png");
             var pixels = string.Join("", listPixel.SelectMany(s => s.Name));
-               
+
             var checksum =
                 string.Join("", SHA256.Create()
                     .ComputeHash(Encoding.UTF8.GetBytes(pixels)).Select(s => s.ToString("x2")));
