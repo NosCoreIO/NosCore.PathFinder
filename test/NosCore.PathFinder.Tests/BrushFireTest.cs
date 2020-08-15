@@ -66,7 +66,8 @@ namespace NosCore.PathFinder.Tests
                     }
                     var sf = new StringFormat
                     {
-                        LineAlignment = StringAlignment.Center, Alignment = StringAlignment.Center
+                        LineAlignment = StringAlignment.Center,
+                        Alignment = StringAlignment.Center
                     };
                     var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
                     graphics.DrawString(brushFire[x, y]?.F.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
@@ -75,15 +76,20 @@ namespace NosCore.PathFinder.Tests
             }
 
             var path = Path.GetFullPath("../../../../../documentation/brushfire.png");
-            bitmap.Save(path, ImageFormat.Png);
-            using FileStream stream = File.OpenRead(path);
+            var listPixel = new List<Color>();
+            for (var y = 0; y < bitmap.Height; y++)
+            {
+                for (var x = 0; x < bitmap.Width; x++)
+                {
+                    listPixel.Add(bitmap.GetPixel(x, y));
+                }
+            }
+
             var builder = new StringBuilder();
             builder.AppendLine("# NosCore.Pathfinder's Documentation");
             builder.AppendLine("## Brushfire");
             builder.AppendLine("- Filename: brushfire.png");
-            using MemoryStream ms = new MemoryStream();
-            bitmap.Save(ms, ImageFormat.Bmp);
-            builder.AppendLine($"- BMP SHA256: {string.Join("", SHA256.Create().ComputeHash(ms.ToArray()).Select(s => s.ToString("x2")))}");
+            builder.AppendLine($"- Checksum: {string.Join("", SHA256.Create().ComputeHash(listPixel.SelectMany(s=>Encoding.UTF8.GetBytes($"{s.A}{s.R}{s.G}{s.B}")).ToArray()).Select(s => s.ToString("x2")))}");
             builder.AppendLine("![brushfire](./brushfire.png)");
             Approvals.Verify(WriterFactory.CreateTextWriter(builder.ToString(), "md"));
         }
