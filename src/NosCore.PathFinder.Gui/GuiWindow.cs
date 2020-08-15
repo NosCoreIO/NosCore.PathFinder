@@ -19,6 +19,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using Color = OpenTK.Color;
 
 namespace NosCore.PathFinder.Gui
 {
