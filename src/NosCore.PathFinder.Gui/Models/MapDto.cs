@@ -60,14 +60,14 @@ namespace NosCore.PathFinder.Gui.Models
             var minY = (short)(-ypoint + firstY);
             var maxY = (short)(ypoint + firstY);
 
-            var cells = new List<Cell>();
+            var cells = new List<ValuedCell>();
             for (var y = minY; y <= maxY; y++)
             {
                 for (var x = minX; x <= maxX; x++)
                 {
                     if ((x != firstX) || (y != firstY))
                     {
-                        cells.Add(new Cell(x, y));
+                        cells.Add(new ValuedCell(x, y));
                     }
                 }
             }
