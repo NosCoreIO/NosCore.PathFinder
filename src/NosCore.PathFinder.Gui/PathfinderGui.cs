@@ -41,7 +41,7 @@ namespace NosCore.PathFinder.Gui
             optionsBuilder.UseNpgsql(PathfinderGuiConfiguration.Database!.ConnectionString);
             DbContextBuilder.Initialize(optionsBuilder.Options);
             var  mapDao = new Dao<Map, MapDto, short>(logger, DbContextBuilder);
-            var distanceCalculator = new OctileDistanceCalculator();
+            var distanceCalculator = new OctileDistanceHeuristic();
 
             while (true)
             {
