@@ -20,9 +20,14 @@ namespace NosCore.PathFinder.Pathfinder
             CacheBrushFire(brushFire);
         }
 
-        private GoalBasedNode? GetParent(ValuedCell currentnode, BrushFire brushFire, GoalBasedNode?[,] brushFireNodes)
+        private GoalBasedNode? GetParent(ValuedCell currentnode, BrushFire brushFire, GoalBasedNode?[,] brushFireNodes, int maxDepth)
         {
-            var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new ValuedCell(s.X, s.Y, brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault();
+            if (maxDepth == 0)
+            {
+                return null;
+            }
+
+            var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new ValuedCell(s.X, s.Y, brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault(s => IsInBoundaries(s, brushFireNodes));
             if (newnode is { } cell)
             {
                 var currentNode = new GoalBasedNode(cell, null);
@@ -30,7 +35,7 @@ namespace NosCore.PathFinder.Pathfinder
 
                 if (cell.Value > 1)
                 {
-                    currentNode.Parent ??= GetParent(cell, brushFire, brushFireNodes);
+                    currentNode.Parent ??= GetParent(cell, brushFire, brushFireNodes, maxDepth - 1);
                 }
 
                 return brushFireNodes[cell.X, cell.Y];
@@ -40,7 +45,6 @@ namespace NosCore.PathFinder.Pathfinder
         }
         private GoalBasedNode?[,] CacheBrushFire(BrushFire brushFire)
         {
-
             GoalBasedNode?[,] brushFireNodes = new GoalBasedNode?[brushFire.GetLength(1), brushFire.GetLength(0)];
             for (short y = 0; y < brushFire.GetLength(1); y++)
             {
@@ -51,28 +55,33 @@ namespace NosCore.PathFinder.Pathfinder
                         continue;
                     }
 
-                    GetParent(currentnode, brushFire, brushFireNodes);
+                    GetParent(currentnode, brushFire, brushFireNodes, brushFire.Size);
                 }
             }
             _brushFirecache.Set(brushFire.OriginCell, brushFireNodes, DateTimeOffset.Now.AddSeconds(10));
             return brushFireNodes;
         }
 
+        private bool IsInBoundaries(Cell cell, GoalBasedNode?[,]? brushFireOut)
+        {
+            return !(cell.X >= brushFireOut?.GetLength(0) || cell.Y >= brushFireOut?.GetLength(1) ||
+                     cell.X < 0 || cell.Y < 0);
+        }
+
         public IEnumerable<Cell> FindPath(Cell start, Cell end)
         {
             List<Cell> list = new List<Cell>();
-            _brushFirecache.TryGetValue(start, out GoalBasedNode?[,]? brushFireOut);
+            _brushFirecache.TryGetValue(end, out GoalBasedNode?[,]? brushFireOut);
+
+            if (!IsInBoundaries(start, brushFireOut) || !IsInBoundaries(end, brushFireOut))
+            {
+                return list;
+            }
+
             if (brushFireOut == null)
             {
                 var brushFire = _mapGrid.LoadBrushFire(start, _heuristic);
                 brushFireOut = CacheBrushFire(brushFire);
-            }
-            if (brushFireOut == null || end.X >= brushFireOut.GetLength(0) || end.Y >= brushFireOut.GetLength(1) ||
-                brushFireOut[end.X, end.Y] == null || end.X < 0 || end.Y < 0 ||
-                start.X >= brushFireOut.GetLength(0) || start.Y >= brushFireOut.GetLength(1) ||
-                brushFireOut[start.X, start.Y] == null || start.X < 0 || start.Y < 0)
-            {
-                return list;
             }
 
             if (!(brushFireOut[end.X, end.Y] is { } currentnode)) return list;

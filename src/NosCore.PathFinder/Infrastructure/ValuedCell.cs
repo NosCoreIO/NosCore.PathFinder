@@ -30,7 +30,7 @@ namespace NosCore.PathFinder.Infrastructure
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
     public readonly struct Cell
     {
         public Cell(short x, short y)
