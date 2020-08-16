@@ -13,6 +13,7 @@ using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
+using NosCore.PathFinder.Gui.GuiObject;
 using NosCore.PathFinder.Heuristic;
 using NosCore.PathFinder.Infrastructure;
 using OpenTK;
@@ -29,14 +30,14 @@ namespace NosCore.PathFinder.Gui
         private readonly byte _gridsize;
         private readonly MapDto _map;
 
-        private readonly List<MapMonsterDto> _monsters;
-        private readonly List<MapNpcDto> _npcs;
+        private readonly List<MapMonsterGo> _monsters;
+        private readonly List<MapNpcGo> _npcs;
         private readonly int _originalHeight;
         private readonly int _originalWidth;
         private readonly List<Tuple<short, short, byte>> _walls = new List<Tuple<short, short, byte>>();
         private double _gridsizeX;
         private double _gridsizeY;
-        private readonly Character _mouseCharacter;
+        private readonly CharacterGo _mouseCharacter;
 
         public GuiWindow(MapDto map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(width * gridsize, height * gridsize, GraphicsMode.Default, title)
         {
@@ -48,9 +49,9 @@ namespace NosCore.PathFinder.Gui
             _gridsizeX = gridsize;
             _gridsizeY = gridsize;
             _gridsize = gridsize;
-            _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterDto>>() ?? new List<MapMonsterDto>();
+            _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterGo>>() ?? new List<MapMonsterGo>();
             _map = map;
-            _mouseCharacter = new Character { BrushFire = new BrushFire(new Cell(), 0, new ValuedCell?[_map.XLength, _map.YLength]) };
+            _mouseCharacter = new CharacterGo { BrushFire = new BrushFire(new Cell(), 0, new ValuedCell?[_map.XLength, _map.YLength]) };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -59,7 +60,7 @@ namespace NosCore.PathFinder.Gui
                 mapMonster.Map = _map;
             }
 
-            _npcs = mapNpcDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapNpcDto>>() ?? new List<MapNpcDto>();
+            _npcs = mapNpcDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapNpcGo>>() ?? new List<MapNpcGo>();
             foreach (var mapNpc in _npcs)
             {
                 mapNpc.PositionX = mapNpc.MapX;
