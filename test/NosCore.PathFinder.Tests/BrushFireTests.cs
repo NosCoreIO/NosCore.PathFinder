@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -9,10 +8,8 @@ using System.Text;
 using ApprovalTests;
 using ApprovalTests.Writers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using NosCore.PathFinder.Heuristic;
 using NosCore.PathFinder.Infrastructure;
-using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Tests
 {

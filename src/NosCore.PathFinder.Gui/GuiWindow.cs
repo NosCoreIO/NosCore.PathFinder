@@ -6,18 +6,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Mapster;
-using NosCore.Dao.Interfaces;
 using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
 using NosCore.PathFinder.Heuristic;
 using NosCore.PathFinder.Infrastructure;
-using NosCore.PathFinder.Interfaces;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
