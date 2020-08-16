@@ -27,31 +27,35 @@ namespace NosCore.PathFinder.Gui
     public class GuiWindow : GameWindow
     {
         private static readonly ILogger Logger = NosCore.Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
-        private readonly byte _gridsize;
         private readonly MapDto _map;
 
         private readonly List<MapMonsterGo> _monsters;
         private readonly List<MapNpcGo> _npcs;
-        private readonly int _originalHeight;
-        private readonly int _originalWidth;
-        private readonly List<Tuple<short, short, byte>> _walls = new List<Tuple<short, short, byte>>();
-        private double _gridsizeX;
-        private double _gridsizeY;
-        private readonly CharacterGo _mouseCharacter;
+        private readonly int _originalCellSize;
 
-        public GuiWindow(MapDto map, byte gridsize, int width, int height, string title, DataAccessHelper dbContextBuilder) : base(width * gridsize, height * gridsize, GraphicsMode.Default, title)
+        private readonly List<Tuple<short, short, byte, Vector2[]>> _walls =
+            new List<Tuple<short, short, byte, Vector2[]>>();
+
+        private float _cellSize;
+        private readonly CharacterGo _mouseCharacter;
+        private readonly int _originalWidth;
+
+        public GuiWindow(MapDto map, int width, int height, string title, DataAccessHelper dbContextBuilder)
+            : base(width, (height < width / map.XLength * map.YLength) ? width / map.XLength * map.YLength : height,
+                GraphicsMode.Default, title)
         {
             var dbContextBuilder1 = dbContextBuilder;
             var mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1);
             var mapNpcDao = new Dao<MapNpc, MapNpcDto, int>(Logger, dbContextBuilder1);
-            _originalWidth = width * gridsize;
-            _originalHeight = height * gridsize;
-            _gridsizeX = gridsize;
-            _gridsizeY = gridsize;
-            _gridsize = gridsize;
-            _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterGo>>() ?? new List<MapMonsterGo>();
+            _originalWidth = Width;
+            _originalCellSize = Width / map.XLength;
+            _cellSize = Width / map.XLength;
+
+            _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterGo>>() ??
+                        new List<MapMonsterGo>();
             _map = map;
-            _mouseCharacter = new CharacterGo { BrushFire = new BrushFire(new Cell(), 0, new ValuedCell?[_map.XLength, _map.YLength]) };
+            _mouseCharacter = new CharacterGo
+            { BrushFire = new BrushFire(new Cell(), 0, new ValuedCell?[_map.XLength, _map.YLength]) };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -81,6 +85,7 @@ namespace NosCore.PathFinder.Gui
 
             var keyboardState = new KeyboardState();
             var lastKeyboardState = new KeyboardState();
+
             bool KeyPress(Key key)
             {
                 return (keyboardState[key] && (keyboardState[key] != lastKeyboardState[key]));
@@ -92,12 +97,19 @@ namespace NosCore.PathFinder.Gui
             }
         }
 
+        protected override void OnResize(EventArgs e)
+        {
+            _cellSize = (float)_originalCellSize * Width / _originalWidth;
+            GL.Viewport(0, 0, Width, Height);
+            base.OnResize(e);
+        }
+
         protected override void OnMouseMove(MouseMoveEventArgs e)
         {
             base.OnMouseMove(e);
 
-            _mouseCharacter.MapX = (short)(e.X / _gridsize);
-            _mouseCharacter.MapY = (short)(e.Y / _gridsize);
+            _mouseCharacter.MapX = (short)(e.X / _cellSize);
+            _mouseCharacter.MapY = (short)(e.Y / _cellSize);
             _mouseCharacter.BrushFire = _map.LoadBrushFire(new Cell(_mouseCharacter.MapX, _mouseCharacter.MapY),
                 new OctileDistanceHeuristic());
         }
@@ -105,10 +117,11 @@ namespace NosCore.PathFinder.Gui
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.ClearColor(Color.LightSkyBlue.A, Color.LightSkyBlue.R, Color.LightSkyBlue.G, Color.LightSkyBlue.B);
-            _gridsizeX = _gridsize * (ClientRectangle.Width / (double)_originalWidth);
-            _gridsizeY = _gridsize * (ClientRectangle.Height / (double)_originalHeight);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             var world = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Width, ClientRectangle.Height, 0, 0, 1);
             GL.LoadMatrix(ref world);
 
@@ -124,7 +137,7 @@ namespace NosCore.PathFinder.Gui
                         {
                             alpha = 0;
                         }
-                        DrawPixel(x, y, Color.FromArgb((int)(alpha), 0, 255, 0));
+                        DrawPixel(GeneratePixel(x, y), Color.FromArgb((int)(alpha), 0, 255, 0), PrimitiveType.Quads);
                     }
                 }
             }
@@ -133,7 +146,7 @@ namespace NosCore.PathFinder.Gui
 
             foreach (var wall in _walls)
             {
-                DrawPixel(wall.Item1, wall.Item2, Color.Blue); //TODO iswalkable
+                DrawPixel(wall.Item4, Color.Blue, PrimitiveType.Quads); //TODO iswalkable
             }
 
             foreach (var monster in _monsters)
@@ -146,54 +159,68 @@ namespace NosCore.PathFinder.Gui
                 DrawPixelCircle(npc.PositionX, npc.PositionY, Color.Yellow);
             }
 
-
             SwapBuffers();
         }
 
         private void GetMap()
         {
-            for (short i = 0; i < _map.YLength; i++)
+            for (short y = 0; y < _map.YLength; y++)
             {
-                for (short t = 0; t < _map.XLength; t++)
+                for (short x = 0; x < _map.XLength; x++)
                 {
-                    var value = _map[t, i];
-                    if (_map[t, i] > 0)
+                    var value = _map[x, y];
+                    if (_map[x, y] > 0)
                     {
-                        _walls.Add(new Tuple<short, short, byte>(t, i, value));
+                        _walls.Add(new Tuple<short, short, byte, Vector2[]>(x, y, value, GeneratePixel(x, y)));
                     }
                 }
             }
         }
 
-        private void DrawPixel(short x, short y, Color color)
+        private Vector2[] GeneratePixel(short x, short y)
         {
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Begin(PrimitiveType.Quads);
+            return new[]
+            {
+                new Vector2((float)(x * _cellSize), (float)(y * _cellSize)),
+                new Vector2((float)(_cellSize * (x + 1)), (float)(y * _cellSize)),
+                new Vector2((float)(_cellSize * (x + 1)), (float)(_cellSize * (y + 1))),
+                new Vector2((float)(x * _cellSize),(float)( _cellSize * (y + 1)))
+            };
+        }
+
+        private void DrawPixel(Vector2[] vector, Color color, PrimitiveType type)
+        {
+            var vbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector2.SizeInBytes * vector.Length), vector, BufferUsageHint.StaticDraw);
+
+            GL.VertexPointer(2, VertexPointerType.Float, Vector2.SizeInBytes, 0);
             GL.Color4(color);
-            GL.Vertex2(x * _gridsizeX, y * _gridsizeY);
-            GL.Vertex2(_gridsizeX * (x + 1), y * _gridsizeY);
-            GL.Vertex2(_gridsizeX * (x + 1), _gridsizeY * (y + 1));
-            GL.Vertex2(x * _gridsizeX, _gridsizeY * (y + 1));
-            GL.End();
-            GL.Disable(EnableCap.Blend);
+            GL.DrawArrays(type, 0, vector.Length);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.DeleteBuffer(vbo);
         }
 
         private void DrawPixelCircle(short x, short y, Color color)
         {
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-            GL.Begin(PrimitiveType.TriangleFan);
+            var pixelVertexBuffer =
+                new[]
+                {
+                    new Vector2((float)(x * _cellSize), (float)(y * _cellSize))
+                }.Concat(Enumerable.Range(0, 360).Select(i => new Vector2((float)(x * _cellSize + Math.Cos(i) * _cellSize),
+                    (float)(y * _cellSize + Math.Sin(i) * _cellSize)))).ToArray();
+
+            var vbo = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector2.SizeInBytes * pixelVertexBuffer.Length), pixelVertexBuffer, BufferUsageHint.StaticDraw);
+
+            GL.VertexPointer(2, VertexPointerType.Float, Vector2.SizeInBytes, 0);
             GL.Color4(color);
+            GL.DrawArrays(PrimitiveType.TriangleFan, 0, pixelVertexBuffer.Length);
 
-            GL.Vertex2(x * _gridsizeX, y * _gridsizeY);
-            for (var i = 0; i < 360; i++)
-            {
-                GL.Vertex2(x * _gridsizeX + Math.Cos(i) * _gridsizeX, y * _gridsizeY + Math.Sin(i) * _gridsizeY);
-            }
-
-            GL.End();
-            GL.Disable(EnableCap.Blend);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            GL.DeleteBuffer(vbo);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace NosCore.PathFinder.Gui
                     GuiWindows[map.MapId]!.Close();
                 }
 
-                GuiWindows[map.MapId] = new GuiWindow(map, 4, map.XLength, map.YLength,
+                GuiWindows[map.MapId] = new GuiWindow(map,1024, 768,
                     $"NosCore Pathfinder GUI - Map {map.MapId}", DbContextBuilder);
                 GuiWindows[map.MapId]!.Run(30);
             }
