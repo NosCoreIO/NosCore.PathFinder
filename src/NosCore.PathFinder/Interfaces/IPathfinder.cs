@@ -5,6 +5,7 @@
 // -----------------------------------
 
 using System.Collections.Generic;
+using NosCore.PathFinder.Infrastructure;
 
 namespace NosCore.PathFinder.Interfaces
 {

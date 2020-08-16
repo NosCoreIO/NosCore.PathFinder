@@ -6,7 +6,7 @@
 
 using System;
 
-namespace NosCore.PathFinder
+namespace NosCore.PathFinder.Infrastructure
 {
     public class Node : IComparable<Node>
     {

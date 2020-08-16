@@ -4,11 +4,9 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace NosCore.PathFinder
+namespace NosCore.PathFinder.Infrastructure
 {
     internal class MinHeap
     {

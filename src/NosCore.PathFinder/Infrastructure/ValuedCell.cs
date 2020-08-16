@@ -5,12 +5,11 @@
 // -----------------------------------
 
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
-namespace NosCore.PathFinder
+namespace NosCore.PathFinder.Infrastructure
 {
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    public struct ValuedCell
+    public readonly struct ValuedCell
     {
         public ValuedCell(short x, short y, double value = 0)
         {
@@ -23,7 +22,7 @@ namespace NosCore.PathFinder
 
         public short Y => _cell.Y;
 
-        public double Value { get; set; }
+        public double Value { get; }
 
         public static implicit operator Cell(ValuedCell value)
         {
@@ -31,8 +30,8 @@ namespace NosCore.PathFinder
         }
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct Cell
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public readonly struct Cell
     {
         public Cell(short x, short y)
         {
@@ -40,8 +39,8 @@ namespace NosCore.PathFinder
             Y = y;
         }
 
-        public short X { get; set; }
+        public short X { get; }
 
-        public short Y { get; set; }
+        public short Y { get; }
     }
 }

@@ -5,12 +5,9 @@
 // -----------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Mapster;
-using NosCore.PathFinder.Gui.Database;
+using NosCore.PathFinder.Heuristic;
 
 namespace NosCore.PathFinder.Gui.Models
 {

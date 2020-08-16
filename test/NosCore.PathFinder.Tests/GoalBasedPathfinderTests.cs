@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -9,7 +8,10 @@ using System.Text;
 using ApprovalTests;
 using ApprovalTests.Writers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NosCore.PathFinder.Heuristic;
+using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
+using NosCore.PathFinder.Pathfinder;
 
 namespace NosCore.PathFinder.Tests
 {
@@ -41,13 +43,13 @@ namespace NosCore.PathFinder.Tests
 
         private readonly IPathfinder _goalPathfinder;
         private readonly Cell _characterPosition;
-        private readonly ValuedCell?[,] _brushFire;
+        private readonly BrushFire _brushFire;
 
         public GoalBasedPathfinderTests()
         {
             _characterPosition = new Cell(6, 10);
             _brushFire = _map.LoadBrushFire(_characterPosition, new OctileDistanceHeuristic());
-            _goalPathfinder = new GoalBasedPathfinder(_brushFire, _map);
+            _goalPathfinder = new GoalBasedPathfinder(_brushFire, _map, new OctileDistanceHeuristic());
         }
 
         [TestMethod]

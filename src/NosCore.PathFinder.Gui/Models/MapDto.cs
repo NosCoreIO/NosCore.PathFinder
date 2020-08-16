@@ -7,8 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using NosCore.PathFinder.Gui.Database;
+using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 using NosCore.Shared.Helpers;
 
