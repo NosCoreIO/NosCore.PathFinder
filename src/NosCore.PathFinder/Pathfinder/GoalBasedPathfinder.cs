@@ -20,39 +20,69 @@ namespace NosCore.PathFinder.Pathfinder
             CacheBrushFire(brushFire);
         }
 
-        private void CacheBrushFire(BrushFire brushFire)
+        private GoalBasedNode? GetParent(ValuedCell currentnode, BrushFire brushFire, GoalBasedNode?[,] brushFireNodes)
         {
-            _brushFirecache.Remove(brushFire.OriginCell);
-            _brushFirecache.Set(brushFire.OriginCell, brushFire, DateTimeOffset.Now.AddSeconds(10));
+            var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new ValuedCell(s.X, s.Y, brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault();
+            if (newnode is { } cell)
+            {
+                var currentNode = new GoalBasedNode(cell, null);
+                brushFireNodes[cell.X, cell.Y] ??= currentNode;
+
+                if (cell.Value > 1)
+                {
+                    currentNode.Parent ??= GetParent(cell, brushFire, brushFireNodes);
+                }
+
+                return brushFireNodes[cell.X, cell.Y];
+            }
+
+            return null;
+        }
+        private GoalBasedNode?[,] CacheBrushFire(BrushFire brushFire)
+        {
+
+            GoalBasedNode?[,] brushFireNodes = new GoalBasedNode?[brushFire.GetLength(1), brushFire.GetLength(0)];
+            for (short y = 0; y < brushFire.GetLength(1); y++)
+            {
+                for (short x = 0; x < brushFire.GetLength(0); x++)
+                {
+                    if (!(brushFire[x, y] is { } currentnode))
+                    {
+                        continue;
+                    }
+
+                    GetParent(currentnode, brushFire, brushFireNodes);
+                }
+            }
+            _brushFirecache.Set(brushFire.OriginCell, brushFireNodes, DateTimeOffset.Now.AddSeconds(10));
+            return brushFireNodes;
         }
 
         public IEnumerable<Cell> FindPath(Cell start, Cell end)
         {
             List<Cell> list = new List<Cell>();
-            _brushFirecache.TryGetValue(start, out BrushFire? brushFireOut);
-            if (!(brushFireOut is {} brushFire))
+            _brushFirecache.TryGetValue(start, out GoalBasedNode?[,]? brushFireOut);
+            if (brushFireOut == null)
             {
-                brushFire = _mapGrid.LoadBrushFire(start, _heuristic);
-                CacheBrushFire(brushFire);
+                var brushFire = _mapGrid.LoadBrushFire(start, _heuristic);
+                brushFireOut = CacheBrushFire(brushFire);
             }
-            if (end.X >= brushFire.GetLength(0) || end.Y >= brushFire.GetLength(1) ||
-                brushFire[end.X, end.Y] == null || end.X < 0 || end.Y < 0 ||
-                start.X >= brushFire.GetLength(0) || start.Y >= brushFire.GetLength(1) ||
-                brushFire[start.X, start.Y] == null || start.X < 0 || start.Y < 0)
+            if (brushFireOut == null || end.X >= brushFireOut.GetLength(0) || end.Y >= brushFireOut.GetLength(1) ||
+                brushFireOut[end.X, end.Y] == null || end.X < 0 || end.Y < 0 ||
+                start.X >= brushFireOut.GetLength(0) || start.Y >= brushFireOut.GetLength(1) ||
+                brushFireOut[start.X, start.Y] == null || start.X < 0 || start.Y < 0)
             {
                 return list;
             }
 
-            if (!(brushFire[end.X, end.Y] is { } currentnode)) return list;
-            while (currentnode.Value > 1)
+            if (!(brushFireOut[end.X, end.Y] is { } currentnode)) return list;
+            while (currentnode.Parent != null)
             {
-                var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new ValuedCell(s.X, s.Y, brushFire[s.X, s.Y]?.Value ?? 0))?.OrderBy(s => s.Value).FirstOrDefault();
-                if (newnode is { } cell)
-                {
-                    list.Add(cell);
-                    currentnode = cell;
-                }
+                list.Add(currentnode.Parent.Cell);
+                currentnode = currentnode.Parent;
             }
+
+            list.Reverse();
             return list;
         }
     }

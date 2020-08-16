@@ -4,26 +4,26 @@ using System.Text;
 
 namespace NosCore.PathFinder.Infrastructure
 {
-    public struct BrushFire
+    public readonly struct BrushFire
     {
         public BrushFire(Cell originCell, short size, ValuedCell?[,] brushFireGrid)
         {
             OriginCell = originCell;
             Size = size;
-            BrushFireGrid = brushFireGrid;
+            ValuedCellGrid = brushFireGrid;
         }
 
-        public Cell OriginCell { get; set; }
+        private ValuedCell?[,] ValuedCellGrid { get; }
 
-        public short Size { get; set; }
+        public Cell OriginCell { get; }
 
-        public ValuedCell?[,] BrushFireGrid { get; set; }
+        public short Size { get; }
 
-        public ValuedCell? this[int x, int y] => BrushFireGrid[x, y];
+        public ValuedCell? this[int x, int y] => ValuedCellGrid[x, y];
 
         public int GetLength(int dimension)
         {
-            return BrushFireGrid.GetLength(dimension);
+            return ValuedCellGrid.GetLength(dimension);
         }
     }
 }

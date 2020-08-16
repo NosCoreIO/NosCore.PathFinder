@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace NosCore.PathFinder.Infrastructure
 {
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    public struct ValuedCell
+    public readonly struct ValuedCell
     {
         public ValuedCell(short x, short y, double value = 0)
         {
@@ -22,7 +22,7 @@ namespace NosCore.PathFinder.Infrastructure
 
         public short Y => _cell.Y;
 
-        public double Value { get; set; }
+        public double Value { get; }
 
         public static implicit operator Cell(ValuedCell value)
         {
@@ -31,7 +31,7 @@ namespace NosCore.PathFinder.Infrastructure
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
-    public struct Cell
+    public readonly struct Cell
     {
         public Cell(short x, short y)
         {
@@ -39,8 +39,8 @@ namespace NosCore.PathFinder.Infrastructure
             Y = y;
         }
 
-        public short X { get; set; }
+        public short X { get; }
 
-        public short Y { get; set; }
+        public short Y { get; }
     }
 }
