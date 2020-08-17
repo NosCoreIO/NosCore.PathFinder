@@ -33,14 +33,17 @@ namespace NosCore.PathFinder.Gui
         private readonly List<MapNpcGo> _npcs;
         private readonly int _originalCellSize;
 
-        private readonly List<Tuple<short, short, byte>> _walls =
-            new List<Tuple<short, short, byte>>();
-
         private float _cellSize;
         private readonly CharacterGo _mouseCharacter;
         private readonly int _originalWidth;
+
+        private readonly Vector2[] _wallPixels;
+        private readonly (int[] First, int[] Count, int ShapeCount) _wallShapeCount;
+        private readonly (int[] First, int[] Count, int ShapeCount) _monstersShapeCount;
+        private readonly (int[] First, int[] Count, int ShapeCount) _npcsShapeCount;
+
+        private int _vertexBufferObject;
         private Dictionary<Color, Vector2[]>? _brushFirePixels;
-        private Vector2[] _wallPixels;
 
         public GuiWindow(MapDto map, int width, int height, string title, DataAccessHelper dbContextBuilder)
             : base(width, (height < width / map.XLength * map.YLength) ? width / map.XLength * map.YLength : height,
@@ -78,7 +81,21 @@ namespace NosCore.PathFinder.Gui
             _monstersShapeCount = GetStartCount(_monsters.Count * 360, 360);
             Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
             Parallel.ForEach(_npcs.Where(s => s.Life == null), npc => npc.StartLife());
-            GetMap();
+
+            var wallpixels = new List<Vector2[]>();
+            for (short y = 0; y < _map.YLength; y++)
+            {
+                for (short x = 0; x < _map.XLength; x++)
+                {
+                    if (_map[x, y] > 0)
+                    {
+                        wallpixels.Add(GenerateSquare(x, y));
+                    }
+                }
+            }
+
+            _wallPixels = wallpixels.SelectMany(s => s).ToArray();
+            _wallShapeCount = GetStartCount(_wallPixels.Length, 4);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -120,7 +137,7 @@ namespace NosCore.PathFinder.Gui
                 _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY),
                     new OctileDistanceHeuristic());
 
-                _brushFirePixels = _mouseCharacter.BrushFire?.Grid.Values.Where(s => s?.Value != null).GroupBy(s => (int)s.Value!)
+                _brushFirePixels = _mouseCharacter.BrushFire?.Grid.Values.Where(s => s?.Value != null).GroupBy(s => (int)s!.Value!)
                     .ToDictionary(s =>
                     {
                         var alpha = 255 - (s.Key * 10);
@@ -129,7 +146,7 @@ namespace NosCore.PathFinder.Gui
                             alpha = 0;
                         }
                         return Color.FromArgb((int)(alpha), 0, 255, 0);
-                    }, s => s.ToList().SelectMany(s => GenerateSquare(s.Position.X, s.Position.Y)).ToArray());
+                    }, s => s!.ToList().SelectMany(s => GenerateSquare(s!.Position.X, s.Position.Y)).ToArray());
             }
         }
 
@@ -145,11 +162,6 @@ namespace NosCore.PathFinder.Gui
             _vertexBufferObject = GL.GenBuffer();
         }
 
-        private int _vertexBufferObject;
-        private (int[] First, int[] Count, int ShapeCount) _wallShapeCount;
-        private (int[] First, int[] Count, int ShapeCount) _monstersShapeCount;
-        private (int[] First, int[] Count, int ShapeCount) _npcsShapeCount;
-
         protected override void OnUnload(EventArgs e)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
@@ -162,7 +174,7 @@ namespace NosCore.PathFinder.Gui
             var shapeCount = vectorlength / shapeSize;
             var first = new int[shapeCount];
             var count = new int[shapeCount];
-            for (int i = 0; i < shapeCount; i++)
+            for (var i = 0; i < shapeCount; i++)
             {
                 first[i] = i * shapeSize;
                 count[i] = shapeSize;
@@ -192,26 +204,6 @@ namespace NosCore.PathFinder.Gui
             DrawShapes(monstersCircle, Color.Yellow, PrimitiveType.TriangleFan, _npcsShapeCount);
 
             SwapBuffers();
-        }
-
-        private void GetMap()
-        {
-            var wallpixels = new List<Vector2[]>();
-            for (short y = 0; y < _map.YLength; y++)
-            {
-                for (short x = 0; x < _map.XLength; x++)
-                {
-                    var value = _map[x, y];
-                    if (_map[x, y] > 0)
-                    {
-                        _walls.Add(new Tuple<short, short, byte>(x, y, value));
-                        wallpixels.Add(GenerateSquare(x, y));
-                    }
-                }
-            }
-
-            _wallPixels = wallpixels.SelectMany(s => s).ToArray();
-            _wallShapeCount = GetStartCount(_wallPixels.Length, 4);
         }
 
         private Vector2[] GenerateSquare(short x, short y)
