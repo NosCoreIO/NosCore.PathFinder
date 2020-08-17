@@ -8,8 +8,8 @@ using System.Text;
 using ApprovalTests;
 using ApprovalTests.Writers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Heuristic;
-using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 using NosCore.PathFinder.Pathfinder;
 
@@ -42,12 +42,12 @@ namespace NosCore.PathFinder.Tests
         });
 
         private readonly IPathfinder _goalPathfinder;
-        private readonly Cell _characterPosition;
+        private readonly (short X, short Y) _characterPosition;
         private readonly BrushFire _brushFire;
 
         public GoalBasedPathfinderTests()
         {
-            _characterPosition = new Cell(6, 10);
+            _characterPosition = (6, 10);
             _brushFire = _map.LoadBrushFire(_characterPosition, new OctileDistanceHeuristic());
             _goalPathfinder = new GoalBasedPathfinder(_brushFire, _map, new OctileDistanceHeuristic());
         }
@@ -59,13 +59,13 @@ namespace NosCore.PathFinder.Tests
             var bitmap = new Bitmap(_map.XLength * scale, _map.YLength * scale);
             using var graphics = Graphics.FromImage(bitmap);
             var listPixel = new List<Color>();
-            var target = new Cell(15, 16);
+            (short X, short Y) target = (15, 16);
             var path = _goalPathfinder.FindPath(_characterPosition, target);
-            for (var y = 0; y < _map.YLength; y++)
+            for (short y = 0; y < _map.YLength; y++)
             {
-                for (var x = 0; x < _map.XLength; x++)
+                for (short x = 0; x < _map.XLength; x++)
                 {
-                    var color = (_brushFire[x, y]?.Value ?? 0d) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(((_brushFire[x, y]?.Value ?? 0) * 12 > 255 ? 255 : (_brushFire[x, y]?.Value ?? 0) * 12)), 0, 0, 255);
+                    var color = (_brushFire[x, y] ?? 0d) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(((_brushFire[x, y] ?? 0) * 12 > 255 ? 255 : (_brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
                     if (x == _characterPosition.X && y == _characterPosition.Y)
                     {
                         color = Color.Green;
@@ -87,7 +87,7 @@ namespace NosCore.PathFinder.Tests
                         Alignment = StringAlignment.Center
                     };
                     var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
-                    graphics.DrawString(_brushFire[x, y]?.Value.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
+                    graphics.DrawString(_brushFire[x, y]?.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
                     graphics.FillRectangle(new Pen(color).Brush, rectangle);
                     listPixel.Add(color);
                 }

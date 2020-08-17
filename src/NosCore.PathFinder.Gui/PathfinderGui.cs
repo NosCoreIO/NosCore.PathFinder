@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using NosCore.PathFinder.Gui.Configuration;
 using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.I18N;
-using NosCore.PathFinder.Gui.Models;
 using NosCore.Dao;
+using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
 using NosCore.Shared.Configuration;
 
@@ -60,7 +60,7 @@ namespace NosCore.PathFinder.Gui
                     GuiWindows[map.MapId]!.Close();
                 }
 
-                GuiWindows[map.MapId] = new GuiWindow(map, 4, map.XLength, map.YLength,
+                GuiWindows[map.MapId] = new GuiWindow(map,1024, 768,
                     $"NosCore Pathfinder GUI - Map {map.MapId}", DbContextBuilder);
                 GuiWindows[map.MapId]!.Run(30);
             }

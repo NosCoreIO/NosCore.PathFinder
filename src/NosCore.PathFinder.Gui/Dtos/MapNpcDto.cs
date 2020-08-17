@@ -4,16 +4,18 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
-using NosCore.PathFinder.Infrastructure;
-
-namespace NosCore.PathFinder.Gui.Models
+namespace NosCore.PathFinder.Gui.Dtos
 {
-    public class Character
+    public class MapNpcDto
     {
+        public int Speed { get; set; }
+
+        public short MapId { get; set; }
+
+        public int MapNpcId { get; set; }
+
         public short MapX { get; set; }
 
         public short MapY { get; set; }
-
-        public BrushFire BrushFire { get; set; }
     }
 }

@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NosCore.PathFinder.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NosCore.PathFinder.Gui", "src\NosCore.PathFinder.Gui\NosCore.PathFinder.Gui.csproj", "{FA7E228B-399D-4E03-994C-3C3D057E134E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NosCore.PathFinder.Benchmark", "test\NosCore.PathFinder.Benchmark\NosCore.PathFinder.Benchmark\NosCore.PathFinder.Benchmark.csproj", "{159A99CE-A97C-4215-8FA8-38BC7C8D382D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{FA7E228B-399D-4E03-994C-3C3D057E134E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA7E228B-399D-4E03-994C-3C3D057E134E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA7E228B-399D-4E03-994C-3C3D057E134E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{159A99CE-A97C-4215-8FA8-38BC7C8D382D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{159A99CE-A97C-4215-8FA8-38BC7C8D382D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{159A99CE-A97C-4215-8FA8-38BC7C8D382D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{159A99CE-A97C-4215-8FA8-38BC7C8D382D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

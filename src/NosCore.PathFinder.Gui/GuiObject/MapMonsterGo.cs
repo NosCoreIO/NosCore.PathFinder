@@ -1,34 +1,22 @@
-﻿//  __  _  __    __   ___ __  ___ ___
-// |  \| |/__\ /' _/ / _//__\| _ \ __|
-// | | ' | \/ |`._`.| \_| \/ | v / _|
-// |_|\__|\__/ |___/ \__/\__/|_|_\___|
-// -----------------------------------
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
-using Mapster;
+using System.Text;
+using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
 
-namespace NosCore.PathFinder.Gui.Models
+namespace NosCore.PathFinder.Gui.GuiObject
 {
-    public class MapMonsterDto : IMovableEntity
+    public class MapMonsterGo : MapMonsterDto ,IMovableEntity
     {
         public short PositionX { get; set; }
 
         public short PositionY { get; set; }
-        public int Speed { get; set; }
-
-        public short MapId { get; set; }
-
-        public int MapMonsterId { get; set; }
 
         public DateTime LastMove { get; set; }
-        public short MapX { get; set; }
 
-        public short MapY { get; set; }
-
-        [AdaptIgnore]
         public IDisposable? Life { get; set; }
+
         public MapDto Map
         {
             get;
