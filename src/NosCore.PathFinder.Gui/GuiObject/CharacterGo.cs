@@ -14,6 +14,6 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
         public short MapY { get; set; }
 
-        public BrushFire BrushFire { get; set; }
+        public BrushFire? BrushFire { get; set; }
     }
 }
