@@ -4,9 +4,9 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
-using NosCore.PathFinder.Infrastructure;
+using NosCore.PathFinder.Brushfire;
 
-namespace NosCore.PathFinder.Gui.Models
+namespace NosCore.PathFinder.Gui.GuiObject
 {
     public class CharacterGo
     {

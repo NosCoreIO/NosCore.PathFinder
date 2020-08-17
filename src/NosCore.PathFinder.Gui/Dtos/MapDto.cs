@@ -7,11 +7,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 using NosCore.Shared.Helpers;
 
-namespace NosCore.PathFinder.Gui.Models
+namespace NosCore.PathFinder.Gui.Dtos
 {
     public class MapDto : IMapGrid
     {
@@ -59,14 +58,14 @@ namespace NosCore.PathFinder.Gui.Models
             var minY = (short)(-ypoint + firstY);
             var maxY = (short)(ypoint + firstY);
 
-            var cells = new List<ValuedCell>();
+            var cells = new List<(short X, short Y)>();
             for (var y = minY; y <= maxY; y++)
             {
                 for (var x = minX; x <= maxX; x++)
                 {
                     if ((x != firstX) || (y != firstY))
                     {
-                        cells.Add(new ValuedCell(x, y));
+                        cells.Add((x, y));
                     }
                 }
             }

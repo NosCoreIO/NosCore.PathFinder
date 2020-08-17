@@ -1,9 +1,7 @@
-﻿using NosCore.PathFinder.Infrastructure;
-
-namespace NosCore.PathFinder.Interfaces
+﻿namespace NosCore.PathFinder.Interfaces
 {
     public interface IHeuristic
     {
-        public double GetDistance(Cell from, Cell to);
+        public double GetDistance((short X, short Y) from, (short X, short Y) to);
     }
 }

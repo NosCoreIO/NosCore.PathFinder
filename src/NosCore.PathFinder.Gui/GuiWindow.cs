@@ -10,12 +10,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Mapster;
 using NosCore.PathFinder.Gui.Database;
-using NosCore.PathFinder.Gui.Models;
 using Serilog;
 using NosCore.Dao;
+using NosCore.PathFinder.Brushfire;
+using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Gui.GuiObject;
 using NosCore.PathFinder.Heuristic;
-using NosCore.PathFinder.Infrastructure;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -55,7 +55,7 @@ namespace NosCore.PathFinder.Gui
                         new List<MapMonsterGo>();
             _map = map;
             _mouseCharacter = new CharacterGo
-            { BrushFire = new BrushFire(new Cell(), 0, new ValuedCell?[_map.XLength, _map.YLength]) };
+            { BrushFire = new BrushFire((0, 0), 0, new Dictionary<(short X, short Y), BrushFireNode?>(), _map.XLength, _map.YLength) };
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -110,7 +110,7 @@ namespace NosCore.PathFinder.Gui
 
             _mouseCharacter.MapX = (short)(e.X / _cellSize);
             _mouseCharacter.MapY = (short)(e.Y / _cellSize);
-            _mouseCharacter.BrushFire = _map.LoadBrushFire(new Cell(_mouseCharacter.MapX, _mouseCharacter.MapY),
+            _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY),
                 new OctileDistanceHeuristic());
         }
 
@@ -130,9 +130,9 @@ namespace NosCore.PathFinder.Gui
             {
                 for (short x = 0; x < _map.XLength; x++)
                 {
-                    if (!Equals(_mouseCharacter.BrushFire[x, y]?.Value ?? 0d, 0d))
+                    if (!Equals(_mouseCharacter.BrushFire[x, y] ?? 0d, 0d))
                     {
-                        var alpha = 255 - ((_mouseCharacter.BrushFire[x, y]?.Value ?? 0) * 10);
+                        var alpha = 255 - ((_mouseCharacter.BrushFire[x, y] ?? 0) * 10);
                         if (alpha < 0)
                         {
                             alpha = 0;

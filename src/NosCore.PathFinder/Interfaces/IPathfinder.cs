@@ -5,12 +5,11 @@
 // -----------------------------------
 
 using System.Collections.Generic;
-using NosCore.PathFinder.Infrastructure;
 
 namespace NosCore.PathFinder.Interfaces
 {
     public interface IPathfinder
     {
-        IEnumerable<Cell> FindPath(Cell start, Cell end);
+        IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end);
     }
 }

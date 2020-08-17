@@ -5,7 +5,6 @@
 // -----------------------------------
 
 using System;
-using NosCore.PathFinder.Infrastructure;
 using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Heuristic
@@ -14,7 +13,7 @@ namespace NosCore.PathFinder.Heuristic
     {
         public readonly double Sqrt2 = Math.Sqrt(2);
 
-        public double GetDistance(Cell fromValuedCell, Cell toValuedCell)
+        public double GetDistance((short X, short Y) fromValuedCell, (short X, short Y) toValuedCell)
         {
             var iDx = Math.Abs(fromValuedCell.X - toValuedCell.X);
             var iDy = Math.Abs(fromValuedCell.Y - toValuedCell.Y);

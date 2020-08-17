@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Text;
-using NosCore.PathFinder.Gui.Models;
+using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
 
 namespace NosCore.PathFinder.Gui.GuiObject

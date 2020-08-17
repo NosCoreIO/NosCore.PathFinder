@@ -4,12 +4,7 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
-using System;
-using System.Reactive.Linq;
-using Mapster;
-using NosCore.PathFinder.Heuristic;
-
-namespace NosCore.PathFinder.Gui.Models
+namespace NosCore.PathFinder.Gui.Dtos
 {
     public class MapNpcDto
     {

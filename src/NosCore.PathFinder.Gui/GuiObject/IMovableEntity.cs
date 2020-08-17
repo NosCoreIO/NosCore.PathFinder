@@ -7,11 +7,11 @@
 using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using NosCore.PathFinder.Infrastructure;
+using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Interfaces;
 using NosCore.Shared.Helpers;
 
-namespace NosCore.PathFinder.Gui.Models
+namespace NosCore.PathFinder.Gui.GuiObject
 {
     public interface IMovableEntity
     {
@@ -49,7 +49,7 @@ namespace NosCore.PathFinder.Gui.Models
                 return Task.CompletedTask;
             }
 
-            var distance = (int)distanceCalculator.GetDistance(new Cell(nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), new Cell(mapX, mapY));
+            var distance = (int)distanceCalculator.GetDistance((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), (mapX, mapY));
             var value = 1000d * distance / (2 * nonPlayableEntity.Speed);
             Observable.Timer(TimeSpan.FromMilliseconds(value))
                 .Subscribe(

@@ -6,15 +6,15 @@
 
 using System.Collections.Generic;
 
-namespace NosCore.PathFinder.Infrastructure
+namespace NosCore.PathFinder.Brushfire
 {
     internal class MinHeap
     {
-        private readonly List<Node> _array = new List<Node>();
+        private readonly List<BrushFireNode> _array = new List<BrushFireNode>();
 
         public int Count => _array.Count;
 
-        public Node Pop()
+        public BrushFireNode Pop()
         {
             var ret = _array[0];
             _array[0] = _array[^1];
@@ -47,7 +47,7 @@ namespace NosCore.PathFinder.Infrastructure
             return ret;
         }
 
-        public void Push(Node element)
+        public void Push(BrushFireNode element)
         {
             _array.Add(element);
             var c = _array.Count - 1;

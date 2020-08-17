@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using NosCore.PathFinder.Gui.Configuration;
 using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.I18N;
-using NosCore.PathFinder.Gui.Models;
 using NosCore.Dao;
+using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
 using NosCore.Shared.Configuration;
 
