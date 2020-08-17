@@ -74,6 +74,8 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.Map = _map;
             }
 
+            _npcsShapeCount = GetStartCount(_npcs.Count * 360, 360);
+            _monstersShapeCount = GetStartCount(_monsters.Count * 360, 360);
             Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
             Parallel.ForEach(_npcs.Where(s => s.Life == null), npc => npc.StartLife());
             GetMap();
@@ -144,6 +146,9 @@ namespace NosCore.PathFinder.Gui
         }
 
         private int _vertexBufferObject;
+        private (int[] First, int[] Count, int ShapeCount) _wallShapeCount;
+        private (int[] First, int[] Count, int ShapeCount) _monstersShapeCount;
+        private (int[] First, int[] Count, int ShapeCount) _npcsShapeCount;
 
         protected override void OnUnload(EventArgs e)
         {
@@ -152,9 +157,9 @@ namespace NosCore.PathFinder.Gui
             base.OnUnload(e);
         }
 
-        private (int[] First, int[] Count, int ShapeCount) GetStartCount(Vector2[] vectors, int shapeSize)
+        private (int[] First, int[] Count, int ShapeCount) GetStartCount(int vectorlength, int shapeSize)
         {
-            var shapeCount = vectors.Length / shapeSize;
+            var shapeCount = vectorlength / shapeSize;
             var first = new int[shapeCount];
             var count = new int[shapeCount];
             for (int i = 0; i < shapeCount; i++)
@@ -171,20 +176,20 @@ namespace NosCore.PathFinder.Gui
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            DrawShapes(_wallPixels, Color.Blue, PrimitiveType.Quads, GetStartCount(_wallPixels, 4));
+            DrawShapes(_wallPixels, Color.Blue, PrimitiveType.Quads, _wallShapeCount);
             foreach (var pixel in _brushFirePixels ?? new Dictionary<Color, Vector2[]>())
             {
-                DrawShapes(pixel.Value, pixel.Key, PrimitiveType.Quads, GetStartCount(pixel.Value, 4));
+                DrawShapes(pixel.Value, pixel.Key, PrimitiveType.Quads, GetStartCount(pixel.Value.Length, 4));
             }
 
             var circle = GenerateCircle(_mouseCharacter.MapX, _mouseCharacter.MapY);
-            DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan, GetStartCount(circle, 360));
+            DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan, (new[] { 0 }, new[] { 360 }, 1));
 
             var monstersCircle = _monsters.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan, GetStartCount(monstersCircle, 360));
+            DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan, _monstersShapeCount);
 
             var npcCircle = _npcs.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Yellow, PrimitiveType.TriangleFan, GetStartCount(npcCircle, 360));
+            DrawShapes(monstersCircle, Color.Yellow, PrimitiveType.TriangleFan, _npcsShapeCount);
 
             SwapBuffers();
         }
@@ -206,6 +211,7 @@ namespace NosCore.PathFinder.Gui
             }
 
             _wallPixels = wallpixels.SelectMany(s => s).ToArray();
+            _wallShapeCount = GetStartCount(_wallPixels.Length, 4);
         }
 
         private Vector2[] GenerateSquare(short x, short y)
@@ -227,7 +233,6 @@ namespace NosCore.PathFinder.Gui
 
         private void DrawShapes(Vector2[] vector, Color color, PrimitiveType type, (int[] First, int[] Count, int ShapeCount) shapeSize)
         {
-            var enumerable = Enumerable.Range(0, shapeSize.ShapeCount);
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector2.SizeInBytes * vector.Length), vector, BufferUsageHint.StaticDraw);
 
