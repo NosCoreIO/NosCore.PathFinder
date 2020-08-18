@@ -77,8 +77,8 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.Map = _map;
             }
 
-            _npcsShapeCount = GetStartCount(_npcs.Count * 360, 360);
-            _monstersShapeCount = GetStartCount(_monsters.Count * 360, 360);
+            _npcsShapeCount = GetStartCount(_npcs.Count * 36, 36);
+            _monstersShapeCount = GetStartCount(_monsters.Count * 36, 36);
             Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
             Parallel.ForEach(_npcs.Where(s => s.Life == null), npc => npc.StartLife());
 
@@ -156,7 +156,7 @@ namespace NosCore.PathFinder.Gui
             GL.ClearColor(Color.LightSkyBlue.A, Color.LightSkyBlue.R, Color.LightSkyBlue.G, Color.LightSkyBlue.B);
             var world = Matrix4.CreateOrthographicOffCenter(0, ClientRectangle.Width, ClientRectangle.Height, 0, 0, 1);
             GL.LoadMatrix(ref world);//deprecated
-            GL.EnableClientState(ArrayCap.VertexArray);//deprecated
+            GL.EnableVertexAttribArray(0);
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             _vertexBufferObject = GL.GenBuffer();
@@ -195,7 +195,7 @@ namespace NosCore.PathFinder.Gui
             }
 
             var circle = GenerateCircle(_mouseCharacter.MapX, _mouseCharacter.MapY);
-            DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan, (new[] { 0 }, new[] { 360 }, 1));
+            DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan, (new[] { 0 }, new[] { 36 }, 1));
 
             var monstersCircle = _monsters.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
             DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan, _monstersShapeCount);
@@ -219,7 +219,7 @@ namespace NosCore.PathFinder.Gui
 
         private Vector2[] GenerateCircle(short x, short y)
         {
-            return Enumerable.Range(0, 360).Select(i => new Vector2((float)((x + Math.Cos(i)) * _cellSize),
+            return Enumerable.Range(0, 36).Select(i => new Vector2((float)((x + Math.Cos(i)) * _cellSize),
                 (float)((y + Math.Sin(i)) * _cellSize))).ToArray();
         }
 
@@ -228,7 +228,7 @@ namespace NosCore.PathFinder.Gui
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector2.SizeInBytes * vector.Length), vector, BufferUsageHint.StaticDraw);
 
-            GL.VertexPointer(2, VertexPointerType.Float, Vector2.SizeInBytes, 0);//deprecated
+            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Vector2.SizeInBytes, 0);
             GL.Color4(color); //deprecated
             GL.MultiDrawArrays(type, shapeSize.First, shapeSize.Count, shapeSize.ShapeCount);
 
