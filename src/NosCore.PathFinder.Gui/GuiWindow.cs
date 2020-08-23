@@ -77,8 +77,6 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.Map = _map;
             }
 
-            _npcsShapeCount = GetStartCount(_npcs.Count * 36, 36);
-            _monstersShapeCount = GetStartCount(_monsters.Count * 36, 36);
             Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
             Parallel.ForEach(_npcs.Where(s => s.Life == null), npc => npc.StartLife());
 
@@ -95,24 +93,17 @@ namespace NosCore.PathFinder.Gui
             }
 
             _wallPixels = wallpixels.SelectMany(s => s).ToArray();
-            _wallShapeCount = GetStartCount(_wallPixels.Length, 4);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
 
-            var keyboardState = new KeyboardState();
-            var lastKeyboardState = new KeyboardState();
+            var input = Keyboard.GetState();
 
-            bool KeyPress(Key key)
+            if (input.IsKeyDown(Key.Escape))
             {
-                return (keyboardState[key] && (keyboardState[key] != lastKeyboardState[key]));
-            }
-
-            if (KeyPress(Key.Escape))
-            {
-                Close();
+                Exit();
             }
         }
 
@@ -169,39 +160,25 @@ namespace NosCore.PathFinder.Gui
             base.OnUnload(e);
         }
 
-        private (int[] First, int[] Count, int ShapeCount) GetStartCount(int vectorlength, int shapeSize)
-        {
-            var shapeCount = vectorlength / shapeSize;
-            var first = new int[shapeCount];
-            var count = new int[shapeCount];
-            for (var i = 0; i < shapeCount; i++)
-            {
-                first[i] = i * shapeSize;
-                count[i] = shapeSize;
-            }
-
-            return (first, count, shapeCount);
-        }
-
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            DrawShapes(_wallPixels, Color.Blue, PrimitiveType.Quads, _wallShapeCount);
+            DrawShapes(_wallPixels, Color.Blue, PrimitiveType.Quads);
             foreach (var pixel in _brushFirePixels ?? new Dictionary<Color, Vector2[]>())
             {
-                DrawShapes(pixel.Value, pixel.Key, PrimitiveType.Quads, GetStartCount(pixel.Value.Length, 4));
+                DrawShapes(pixel.Value, pixel.Key, PrimitiveType.Quads);
             }
 
             var circle = GenerateCircle(_mouseCharacter.MapX, _mouseCharacter.MapY);
-            DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan, (new[] { 0 }, new[] { 36 }, 1));
+            DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan);
 
             var monstersCircle = _monsters.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan, _monstersShapeCount);
+            DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan);
 
             var npcCircle = _npcs.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Yellow, PrimitiveType.TriangleFan, _npcsShapeCount);
+            DrawShapes(npcCircle, Color.Yellow, PrimitiveType.TriangleFan);
 
             SwapBuffers();
         }
@@ -223,14 +200,20 @@ namespace NosCore.PathFinder.Gui
                 (float)((y + Math.Sin(i)) * _cellSize))).ToArray();
         }
 
-        private void DrawShapes(Vector2[] vector, Color color, PrimitiveType type, (int[] First, int[] Count, int ShapeCount) shapeSize)
+        private void DrawShapes(Vector2[] vector, Color color, PrimitiveType type)
         {
+            var shapeSize = type == PrimitiveType.Quads ? 4 : 36;
+            var count = vector.Length / shapeSize;
+            var counts = Enumerable.Repeat(shapeSize, count).ToArray();
+            var first = counts.Select((s, i) => s * i).ToArray();
+
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, (IntPtr)(Vector2.SizeInBytes * vector.Length), vector, BufferUsageHint.StaticDraw);
 
             GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Vector2.SizeInBytes, 0);
             GL.Color4(color); //deprecated
-            GL.MultiDrawArrays(type, shapeSize.First, shapeSize.Count, shapeSize.ShapeCount);
+            GL.MultiDrawArrays(type, first, counts, count);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
