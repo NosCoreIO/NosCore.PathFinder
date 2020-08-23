@@ -201,7 +201,7 @@ namespace NosCore.PathFinder.Gui
             DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan, _monstersShapeCount);
 
             var npcCircle = _npcs.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Yellow, PrimitiveType.TriangleFan, _npcsShapeCount);
+            DrawShapes(npcCircle, Color.Yellow, PrimitiveType.TriangleFan, _npcsShapeCount);
 
             SwapBuffers();
         }
