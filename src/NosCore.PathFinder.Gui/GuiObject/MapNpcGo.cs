@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Text;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
+using NosCore.Shared.Enumerations;
 
 namespace NosCore.PathFinder.Gui.GuiObject
 {
@@ -22,6 +23,10 @@ namespace NosCore.PathFinder.Gui.GuiObject
             get;
             set;
         } = null!;
+
+        public long? TargetVisualId { get; set; }
+
+        public VisualType? TargetVisualType { get; set; }
 
         public void StartLife()
         {

@@ -16,6 +16,7 @@ using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Gui.GuiObject;
 using NosCore.PathFinder.Heuristic;
+using NosCore.Shared.Enumerations;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -38,9 +39,6 @@ namespace NosCore.PathFinder.Gui
         private readonly int _originalWidth;
 
         private readonly Vector2[] _wallPixels;
-        private readonly (int[] First, int[] Count, int ShapeCount) _wallShapeCount;
-        private readonly (int[] First, int[] Count, int ShapeCount) _monstersShapeCount;
-        private readonly (int[] First, int[] Count, int ShapeCount) _npcsShapeCount;
 
         private int _vertexBufferObject;
         private Dictionary<Color, Vector2[]>? _brushFirePixels;
@@ -125,8 +123,8 @@ namespace NosCore.PathFinder.Gui
             {
                 _mouseCharacter.MapX = mapX;
                 _mouseCharacter.MapY = mapY;
-                _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY),
-                    new OctileDistanceHeuristic());
+                var distance = new OctileDistanceHeuristic();
+                _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY), distance);
 
                 _brushFirePixels = _mouseCharacter.BrushFire?.Grid.Values.Where(s => s?.Value != null).GroupBy(s => (int)s!.Value!)
                     .ToDictionary(s =>
@@ -138,6 +136,13 @@ namespace NosCore.PathFinder.Gui
                         }
                         return Color.FromArgb((int)(alpha), 0, 255, 0);
                     }, s => s!.ToList().SelectMany(s => GenerateSquare(s!.Position.X, s.Position.Y)).ToArray());
+
+                foreach (var monster in _monsters.Where(s =>
+                    distance.GetDistance((mapX, mapY), (s.PositionX, s.PositionY)) < 5))
+                {
+                    monster.TargetVisualId = 1;
+                    monster.TargetVisualType = VisualType.Player;
+                }
             }
         }
 
