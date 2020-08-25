@@ -5,6 +5,7 @@
 // -----------------------------------
 
 using System;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -16,25 +17,31 @@ using NosCore.Shared.Helpers;
 
 namespace NosCore.PathFinder.Gui.GuiObject
 {
-    public interface IMovableEntity
+    public interface IMovableEntity : IAliveEntity
     {
         DateTime LastMove { get; set; }
+    }
 
+    public interface IAliveEntity : IVisualEntity
+    {
         short MapX { get; set; }
 
         short MapY { get; set; }
 
-        short PositionX { get; set; }
-
-        short PositionY { get; set; }
-
         int Speed { get; set; }
-
-        MapDto Map { get; set; }
 
         long? TargetVisualId { get; set; }
 
         public VisualType? TargetVisualType { get; set; }
+    }
+
+    public interface IVisualEntity
+    {
+        short PositionX { get; set; }
+
+        short PositionY { get; set; }
+
+        MapDto Map { get; set; }
     }
 
     public static class IMovableEntityExtension
@@ -60,10 +67,27 @@ namespace NosCore.PathFinder.Gui.GuiObject
             }
             else
             {
-                //if target arround
-                //todo pathfind
-                //else startpolling
-                //    on exit reset target, go back
+                var target = nonPlayableEntity.Map.Players.FirstOrDefault(s=>s.TargetVisualId == nonPlayableEntity.TargetVisualId);
+                if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 10)
+                {
+                    //todo pathfind
+                }
+                else
+                {
+                    var targetFound = false;
+                    for (var i = 0; i < 10; i++)
+                    {
+                        //todo search the target or any target (npc / player) if aggresive
+                        await Task.Delay(500);
+                    }
+
+                    if (targetFound == false)
+                    {
+                        nonPlayableEntity.TargetVisualType = null;
+                        nonPlayableEntity.TargetVisualId = null;
+                        //todo go to initial position
+                    }
+                }
             }
 
             var distance = (int)distanceCalculator.GetDistance((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY), (mapX, mapY));

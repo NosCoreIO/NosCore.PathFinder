@@ -58,6 +58,11 @@ namespace NosCore.PathFinder.Gui
                         new List<MapMonsterGo>();
             _map = map;
             _mouseCharacter = new CharacterGo();
+            _map.Players = new List<CharacterGo>
+            {
+                _mouseCharacter
+            };
+
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
