@@ -176,14 +176,20 @@ namespace NosCore.PathFinder.Gui
                 DrawShapes(pixel.Value, pixel.Key, PrimitiveType.Quads);
             }
 
-            var circle = GenerateCircle(_mouseCharacter.MapX, _mouseCharacter.MapY);
+            var circle = GenerateDisk(_mouseCharacter.MapX, _mouseCharacter.MapY);
             DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan);
 
-            var monstersCircle = _monsters.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan);
+            var monstersDisk = _monsters.Where(s => s.TargetVisualId != null).SelectMany(s => GenerateDisk(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(monstersDisk, Color.Red, PrimitiveType.TriangleFan);
 
-            var npcCircle = _npcs.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(npcCircle, Color.Yellow, PrimitiveType.TriangleFan);
+            var npcDisk = _npcs.Where(s => s.TargetVisualId != null).SelectMany(s => GenerateDisk(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(npcDisk, Color.Yellow, PrimitiveType.TriangleFan);
+
+            var monstersCircle = _monsters.Where(s => s.TargetVisualId == null).SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(monstersCircle, Color.Red, PrimitiveType.LineLoop);
+
+            var npcCircle = _npcs.Where(s => s.TargetVisualId == null).SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(npcCircle, Color.Yellow, PrimitiveType.LineLoop);
 
             SwapBuffers();
         }
@@ -199,15 +205,25 @@ namespace NosCore.PathFinder.Gui
             };
         }
 
-        private Vector2[] GenerateCircle(short x, short y)
+        private Vector2[] GenerateDisk(short x, short y)
         {
             return Enumerable.Range(0, 36).Select(i => new Vector2((float)((x + Math.Cos(i)) * _cellSize),
                 (float)((y + Math.Sin(i)) * _cellSize))).ToArray();
         }
 
+        private Vector2[] GenerateCircle(short x, short y)
+        {
+            return Enumerable.Range(0, 36).Select(i =>
+            {
+                var theta =  3.1415926f * i / 18;
+                return new Vector2((float)((x + Math.Cos(theta)) * _cellSize),
+                    (float)((y + Math.Sin(theta)) * _cellSize));
+            }).ToArray();
+        }
+
         private void DrawShapes(Vector2[] vector, Color color, PrimitiveType type)
         {
-            var shapeSize = type == PrimitiveType.Quads ? 4 : 36;
+            var shapeSize = type == PrimitiveType.Quads ? 4 : type == PrimitiveType.LineLoop ? 36 : 36;
             var count = vector.Length / shapeSize;
             var counts = Enumerable.Repeat(shapeSize, count).ToArray();
             var first = counts.Select((s, i) => s * i).ToArray();
