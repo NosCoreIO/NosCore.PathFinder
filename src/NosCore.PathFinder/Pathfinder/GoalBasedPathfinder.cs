@@ -20,6 +20,7 @@ namespace NosCore.PathFinder.Pathfinder
             CacheBrushFire(brushFire);
         }
 
+        //todo fix that method
         private BrushFireNode? GetParent((short X, short Y) currentnode, BrushFire brushFire, BrushFireNode?[,] brushFireNodes, int maxDepth)
         {
             if (maxDepth == 0)
@@ -43,6 +44,7 @@ namespace NosCore.PathFinder.Pathfinder
 
             return null;
         }
+
         private BrushFireNode?[,] CacheBrushFire(BrushFire brushFire)
         {
             BrushFireNode?[,] brushFireNodes = new BrushFireNode?[brushFire.Width, brushFire.Length];
@@ -85,7 +87,7 @@ namespace NosCore.PathFinder.Pathfinder
             }
 
             if (!(brushFireOut[end.X, end.Y] is { } currentnode)) return list;
-            while (currentnode.Parent != null)
+            while (currentnode.Parent != null && currentnode.Parent.Position != (start))
             {
                 list.Add(currentnode.Parent.Position);
                 currentnode = currentnode.Parent;

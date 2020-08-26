@@ -57,7 +57,10 @@ namespace NosCore.PathFinder.Gui
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterGo>>() ??
                         new List<MapMonsterGo>();
             _map = map;
-            _mouseCharacter = new CharacterGo();
+            _mouseCharacter = new CharacterGo()
+            {
+                VisualId = 1
+            };
             _map.Players = new List<CharacterGo>
             {
                 _mouseCharacter

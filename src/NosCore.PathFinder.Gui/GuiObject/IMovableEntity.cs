@@ -11,7 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using NosCore.PathFinder.Gui.Dtos;
+using NosCore.PathFinder.Heuristic;
 using NosCore.PathFinder.Interfaces;
+using NosCore.PathFinder.Pathfinder;
 using NosCore.Shared.Enumerations;
 using NosCore.Shared.Helpers;
 
@@ -24,6 +26,8 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
     public interface IAliveEntity : IVisualEntity
     {
+        long VisualId { get; }
+
         short MapX { get; set; }
 
         short MapY { get; set; }
@@ -49,14 +53,8 @@ namespace NosCore.PathFinder.Gui.GuiObject
         public static async Task MoveAsync(this IMovableEntity nonPlayableEntity, IHeuristic distanceCalculator)
         {
             var time = (DateTime.Now - nonPlayableEntity.LastMove).TotalMilliseconds;
-            var mapX = nonPlayableEntity.MapX;
-            var mapY = nonPlayableEntity.MapY;
-            if (!nonPlayableEntity.Map.GetFreePosition(ref mapX, ref mapY,
-                (byte)RandomHelper.Instance.RandomNumber(0, 3),
-                (byte)RandomHelper.Instance.RandomNumber(0, 3)))
-            {
-                return;
-            }
+            var mapX = nonPlayableEntity.PositionX;
+            var mapY = nonPlayableEntity.PositionY;
 
             if (nonPlayableEntity.TargetVisualId == null)
             {
@@ -64,20 +62,44 @@ namespace NosCore.PathFinder.Gui.GuiObject
                 {
                     return;
                 }
+                if (!nonPlayableEntity.Map.GetFreePosition(ref mapX, ref mapY,
+                    (byte)RandomHelper.Instance.RandomNumber(0, 3),
+                    (byte)RandomHelper.Instance.RandomNumber(0, 3)))
+                {
+                    return;
+                }
             }
             else
             {
-                var target = nonPlayableEntity.Map.Players.FirstOrDefault(s=>s.TargetVisualId == nonPlayableEntity.TargetVisualId);
+                var target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
                 if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 10)
                 {
-                    //todo pathfind
+                    var goalPathfinder = new GoalBasedPathfinder(target.BrushFire!.Value, nonPlayableEntity.Map, new OctileDistanceHeuristic());
+                    var path = goalPathfinder.FindPath((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY),
+                        (target.PositionX, target.PositionY)).ToList();
+
+                    if (path.Any())
+                    {
+                        mapX = path.First().X;
+                        mapY = path.First().Y;
+                    }
+                    else
+                    {
+                        Console.WriteLine("not found");
+                    }
                 }
                 else
                 {
                     var targetFound = false;
                     for (var i = 0; i < 10; i++)
                     {
-                        //todo search the target or any target (npc / player) if aggresive
+                        target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
+                        if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY),
+                            (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 10)
+                        {
+                            targetFound = true;
+                            break;
+                        }
                         await Task.Delay(500);
                     }
 

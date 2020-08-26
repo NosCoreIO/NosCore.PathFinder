@@ -12,6 +12,8 @@ namespace NosCore.PathFinder.Gui.GuiObject
 {
     public class CharacterGo : IAliveEntity
     {
+        public long VisualId { get; set; }
+
         public short MapX { get; set; }
 
         public short MapY { get; set; }

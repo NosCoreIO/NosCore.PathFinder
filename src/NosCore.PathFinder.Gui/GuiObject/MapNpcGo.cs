@@ -10,6 +10,8 @@ namespace NosCore.PathFinder.Gui.GuiObject
 {
     public class MapNpcGo : MapNpcDto, IMovableEntity
     {
+        public long VisualId => MapNpcId;
+
         public short PositionX { get; set; }
 
         public short PositionY { get; set; }
