@@ -83,10 +83,6 @@ namespace NosCore.PathFinder.Gui.GuiObject
                         mapX = path.First().X;
                         mapY = path.First().Y;
                     }
-                    else
-                    {
-                        Console.WriteLine("not found");
-                    }
                 }
                 else
                 {

@@ -1,5 +1,5 @@
 # NosCore.Pathfinder's Documentation
 ## Goal Based Pathfinder
 - Filename: goal-based-pathfinder.png
-- Checksum: 1ba6e8c75b75f9a5c7d2665130dfb8c7d9ad9c5ad8ffaadc1925257cf40237b9
+- Checksum: 5fb5660ec02509eb66880eea0ed9b6a32d1e612fb6b97412bd34206389161804
 ![brushfire](./goal-based-pathfinder.png)
