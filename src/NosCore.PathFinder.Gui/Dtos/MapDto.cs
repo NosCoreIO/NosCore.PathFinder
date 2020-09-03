@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NosCore.PathFinder.Gui.GuiObject;
 using NosCore.PathFinder.Interfaces;
 using NosCore.Shared.Helpers;
 
@@ -47,6 +48,8 @@ namespace NosCore.PathFinder.Gui.Dtos
                 return _yLength;
             }
         }
+
+        public List<CharacterGo> Players { get; set; }
 
         public byte this[short x, short y] => Data.AsSpan().Slice(4 + y * XLength + x, 1)[0];
 

@@ -16,6 +16,7 @@ using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Gui.GuiObject;
 using NosCore.PathFinder.Heuristic;
+using NosCore.Shared.Enumerations;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -38,9 +39,6 @@ namespace NosCore.PathFinder.Gui
         private readonly int _originalWidth;
 
         private readonly Vector2[] _wallPixels;
-        private readonly (int[] First, int[] Count, int ShapeCount) _wallShapeCount;
-        private readonly (int[] First, int[] Count, int ShapeCount) _monstersShapeCount;
-        private readonly (int[] First, int[] Count, int ShapeCount) _npcsShapeCount;
 
         private int _vertexBufferObject;
         private Dictionary<Color, Vector2[]>? _brushFirePixels;
@@ -59,7 +57,15 @@ namespace NosCore.PathFinder.Gui
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterGo>>() ??
                         new List<MapMonsterGo>();
             _map = map;
-            _mouseCharacter = new CharacterGo();
+            _mouseCharacter = new CharacterGo()
+            {
+                VisualId = 1
+            };
+            _map.Players = new List<CharacterGo>
+            {
+                _mouseCharacter
+            };
+
             foreach (var mapMonster in _monsters)
             {
                 mapMonster.PositionX = mapMonster.MapX;
@@ -125,8 +131,8 @@ namespace NosCore.PathFinder.Gui
             {
                 _mouseCharacter.MapX = mapX;
                 _mouseCharacter.MapY = mapY;
-                _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY),
-                    new OctileDistanceHeuristic());
+                var distance = new OctileDistanceHeuristic();
+                _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY), distance);
 
                 _brushFirePixels = _mouseCharacter.BrushFire?.Grid.Values.Where(s => s?.Value != null).GroupBy(s => (int)s!.Value!)
                     .ToDictionary(s =>
@@ -138,6 +144,13 @@ namespace NosCore.PathFinder.Gui
                         }
                         return Color.FromArgb((int)(alpha), 0, 255, 0);
                     }, s => s!.ToList().SelectMany(s => GenerateSquare(s!.Position.X, s.Position.Y)).ToArray());
+
+                foreach (var monster in _monsters.Where(s =>
+                    distance.GetDistance((mapX, mapY), (s.PositionX, s.PositionY)) < 5))
+                {
+                    monster.TargetVisualId = 1;
+                    monster.TargetVisualType = VisualType.Player;
+                }
             }
         }
 
@@ -171,14 +184,20 @@ namespace NosCore.PathFinder.Gui
                 DrawShapes(pixel.Value, pixel.Key, PrimitiveType.Quads);
             }
 
-            var circle = GenerateCircle(_mouseCharacter.MapX, _mouseCharacter.MapY);
+            var circle = GenerateDisk(_mouseCharacter.MapX, _mouseCharacter.MapY);
             DrawShapes(circle, Color.BlueViolet, PrimitiveType.TriangleFan);
 
-            var monstersCircle = _monsters.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(monstersCircle, Color.Red, PrimitiveType.TriangleFan);
+            var monstersDisk = _monsters.Where(s => s.TargetVisualId != null).SelectMany(s => GenerateDisk(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(monstersDisk, Color.Red, PrimitiveType.TriangleFan);
 
-            var npcCircle = _npcs.SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
-            DrawShapes(npcCircle, Color.Yellow, PrimitiveType.TriangleFan);
+            var npcDisk = _npcs.Where(s => s.TargetVisualId != null).SelectMany(s => GenerateDisk(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(npcDisk, Color.Yellow, PrimitiveType.TriangleFan);
+
+            var monstersCircle = _monsters.Where(s => s.TargetVisualId == null).SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(monstersCircle, Color.Red, PrimitiveType.LineLoop);
+
+            var npcCircle = _npcs.Where(s => s.TargetVisualId == null).SelectMany(s => GenerateCircle(s.PositionX, s.PositionY)).ToArray();
+            DrawShapes(npcCircle, Color.Yellow, PrimitiveType.LineLoop);
 
             SwapBuffers();
         }
@@ -194,15 +213,25 @@ namespace NosCore.PathFinder.Gui
             };
         }
 
-        private Vector2[] GenerateCircle(short x, short y)
+        private Vector2[] GenerateDisk(short x, short y)
         {
             return Enumerable.Range(0, 36).Select(i => new Vector2((float)((x + Math.Cos(i)) * _cellSize),
                 (float)((y + Math.Sin(i)) * _cellSize))).ToArray();
         }
 
+        private Vector2[] GenerateCircle(short x, short y)
+        {
+            return Enumerable.Range(0, 36).Select(i =>
+            {
+                var theta =  3.1415926f * i / 18;
+                return new Vector2((float)((x + Math.Cos(theta)) * _cellSize),
+                    (float)((y + Math.Sin(theta)) * _cellSize));
+            }).ToArray();
+        }
+
         private void DrawShapes(Vector2[] vector, Color color, PrimitiveType type)
         {
-            var shapeSize = type == PrimitiveType.Quads ? 4 : 36;
+            var shapeSize = type == PrimitiveType.Quads ? 4 : type == PrimitiveType.LineLoop ? 36 : 36;
             var count = vector.Length / shapeSize;
             var counts = Enumerable.Repeat(shapeSize, count).ToArray();
             var first = counts.Select((s, i) => s * i).ToArray();

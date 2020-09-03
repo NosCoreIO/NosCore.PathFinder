@@ -10,14 +10,19 @@ namespace NosCore.PathFinder.Pathfinder
     public class GoalBasedPathfinder : IPathfinder
     {
         private readonly IMapGrid _mapGrid;
-        private readonly MemoryCache _brushFirecache = new MemoryCache(new MemoryCacheOptions());
+        private static readonly MemoryCache BrushFirecache = new MemoryCache(new MemoryCacheOptions());
         private readonly IHeuristic _heuristic;
 
         public GoalBasedPathfinder(BrushFire brushFire, IMapGrid mapGrid, IHeuristic heuristic)
         {
             _mapGrid = mapGrid;
             _heuristic = heuristic;
-            CacheBrushFire(brushFire);
+
+            BrushFirecache.TryGetValue(brushFire.Origin, out BrushFireNode?[,]? brushFireOut);
+            if (brushFireOut == null)
+            {
+                CacheBrushFire(brushFire);
+            }
         }
 
         private BrushFireNode? GetParent((short X, short Y) currentnode, BrushFire brushFire, BrushFireNode?[,] brushFireNodes, int maxDepth)
@@ -43,6 +48,7 @@ namespace NosCore.PathFinder.Pathfinder
 
             return null;
         }
+
         private BrushFireNode?[,] CacheBrushFire(BrushFire brushFire)
         {
             BrushFireNode?[,] brushFireNodes = new BrushFireNode?[brushFire.Width, brushFire.Length];
@@ -58,7 +64,7 @@ namespace NosCore.PathFinder.Pathfinder
                     GetParent((x, y), brushFire, brushFireNodes, brushFire.Size);
                 }
             }
-            _brushFirecache.Set(brushFire.Origin, brushFireNodes, DateTimeOffset.Now.AddSeconds(10));
+            BrushFirecache.Set(brushFire.Origin, brushFireNodes, DateTimeOffset.Now.AddSeconds(10));
             return brushFireNodes;
         }
 
@@ -71,7 +77,7 @@ namespace NosCore.PathFinder.Pathfinder
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
             List<(short X, short Y)> list = new List<(short X, short Y)>();
-            _brushFirecache.TryGetValue(end, out BrushFireNode?[,]? brushFireOut);
+            BrushFirecache.TryGetValue(end, out BrushFireNode?[,]? brushFireOut);
 
             if (!IsInBoundaries(start, brushFireOut) || !IsInBoundaries(end, brushFireOut))
             {
@@ -80,18 +86,17 @@ namespace NosCore.PathFinder.Pathfinder
 
             if (brushFireOut == null)
             {
-                var brushFire = _mapGrid.LoadBrushFire(start, _heuristic);
+                var brushFire = _mapGrid.LoadBrushFire(end, _heuristic);
                 brushFireOut = CacheBrushFire(brushFire);
             }
 
-            if (!(brushFireOut[end.X, end.Y] is { } currentnode)) return list;
-            while (currentnode.Parent != null)
+            if (!(brushFireOut[start.X, start.Y] is { } currentnode)) return list;
+            while (currentnode.Parent != null && currentnode.Parent.Position != (start))
             {
                 list.Add(currentnode.Parent.Position);
                 currentnode = currentnode.Parent;
             }
 
-            list.Reverse();
             return list;
         }
     }

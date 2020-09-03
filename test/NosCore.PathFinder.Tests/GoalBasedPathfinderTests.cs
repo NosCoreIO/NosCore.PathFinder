@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using ApprovalTests;
 using ApprovalTests.Writers;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Heuristic;
@@ -60,11 +62,18 @@ namespace NosCore.PathFinder.Tests
             using var graphics = Graphics.FromImage(bitmap);
             var listPixel = new List<Color>();
             (short X, short Y) target = (15, 16);
-            var path = _goalPathfinder.FindPath(_characterPosition, target);
+            var path = _goalPathfinder.FindPath(target, _characterPosition);
             for (short y = 0; y < _map.YLength; y++)
             {
                 for (short x = 0; x < _map.XLength; x++)
                 {
+
+                    var sf = new StringFormat
+                    {
+                        LineAlignment = StringAlignment.Center,
+                        Alignment = StringAlignment.Center
+                    };
+                    var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
                     var color = (_brushFire[x, y] ?? 0d) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(((_brushFire[x, y] ?? 0) * 12 > 255 ? 255 : (_brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
                     if (x == _characterPosition.X && y == _characterPosition.Y)
                     {
@@ -74,20 +83,18 @@ namespace NosCore.PathFinder.Tests
                     if (path.Any(s => s.X == x && s.Y == y))
                     {
                         color = Color.FromArgb(100, Color.Purple);
+                        graphics.DrawString(Array.IndexOf(path.ToArray(),(x, y)).ToString(), new Font("Arial", 16), Brushes.Black, rectangle, sf);
+                    }
+                    else
+                    {
+                        graphics.DrawString(_brushFire[x, y]?.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
                     }
 
                     if (x == target.X && y == target.Y)
                     {
-                        color = Color.FromArgb(200, Color.DarkRed);
+                        color = Color.DarkRed;
                     }
 
-                    var sf = new StringFormat
-                    {
-                        LineAlignment = StringAlignment.Center,
-                        Alignment = StringAlignment.Center
-                    };
-                    var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
-                    graphics.DrawString(_brushFire[x, y]?.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
                     graphics.FillRectangle(new Pen(color).Brush, rectangle);
                     listPixel.Add(color);
                 }
