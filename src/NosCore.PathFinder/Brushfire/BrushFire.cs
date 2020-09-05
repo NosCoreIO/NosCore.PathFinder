@@ -5,11 +5,10 @@ namespace NosCore.PathFinder.Brushfire
     public readonly struct BrushFire
     {
 
-        public BrushFire((short X, short Y) origin, short size, Dictionary<(short X, short Y), BrushFireNode?> brushFireGrid, short length,
+        public BrushFire((short X, short Y) origin, Dictionary<(short X, short Y), BrushFireNode?> brushFireGrid, short length,
             short width)
         {
             Origin = origin;
-            Size = size;
             Grid = brushFireGrid;
             Length = length;
             Width = width;
@@ -18,8 +17,6 @@ namespace NosCore.PathFinder.Brushfire
         public (short X, short Y) Origin { get; }
 
         public Dictionary<(short X, short Y), BrushFireNode?> Grid { get; }
-
-        public short Size { get; }
 
         public short Length { get; }
 

@@ -132,9 +132,9 @@ namespace NosCore.PathFinder.Gui
                 _mouseCharacter.MapX = mapX;
                 _mouseCharacter.MapY = mapY;
                 var distance = new OctileDistanceHeuristic();
-                _mouseCharacter.BrushFire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY), distance);
+                var brushfire = _map.LoadBrushFire((_mouseCharacter.MapX, _mouseCharacter.MapY), distance);
 
-                _brushFirePixels = _mouseCharacter.BrushFire?.Grid.Values.Where(s => s?.Value != null).GroupBy(s => (int)s!.Value!)
+                _brushFirePixels = brushfire.Grid.Values.Where(s => s?.Value != null).GroupBy(s => (int)s!.Value!)
                     .ToDictionary(s =>
                     {
                         var alpha = 255 - (s.Key * 10);
@@ -223,7 +223,7 @@ namespace NosCore.PathFinder.Gui
         {
             return Enumerable.Range(0, 36).Select(i =>
             {
-                var theta =  3.1415926f * i / 18;
+                var theta = 3.1415926f * i / 18;
                 return new Vector2((float)((x + Math.Cos(theta)) * _cellSize),
                     (float)((y + Math.Sin(theta)) * _cellSize));
             }).ToArray();

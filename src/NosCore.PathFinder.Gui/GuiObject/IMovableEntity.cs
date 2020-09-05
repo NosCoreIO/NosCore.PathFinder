@@ -72,9 +72,9 @@ namespace NosCore.PathFinder.Gui.GuiObject
             else
             {
                 var target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
-                if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 10)
+                if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 100)
                 {
-                    var goalPathfinder = new GoalBasedPathfinder(target.BrushFire!.Value, nonPlayableEntity.Map, new OctileDistanceHeuristic());
+                    var goalPathfinder = new GoalBasedPathfinder(nonPlayableEntity.Map, new OctileDistanceHeuristic());
                     var path = goalPathfinder.FindPath((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY),
                         (target.PositionX, target.PositionY)).ToList();
 
@@ -91,7 +91,7 @@ namespace NosCore.PathFinder.Gui.GuiObject
                     {
                         target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
                         if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY),
-                            (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 10)
+                            (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 100)
                         {
                             targetFound = true;
                             break;

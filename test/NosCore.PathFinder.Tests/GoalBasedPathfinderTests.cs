@@ -51,7 +51,7 @@ namespace NosCore.PathFinder.Tests
         {
             _characterPosition = (6, 10);
             _brushFire = _map.LoadBrushFire(_characterPosition, new OctileDistanceHeuristic());
-            _goalPathfinder = new GoalBasedPathfinder(_brushFire, _map, new OctileDistanceHeuristic());
+            _goalPathfinder = new GoalBasedPathfinder(_map, new OctileDistanceHeuristic());
         }
 
         [TestMethod]

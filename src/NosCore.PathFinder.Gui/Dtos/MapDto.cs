@@ -49,7 +49,7 @@ namespace NosCore.PathFinder.Gui.Dtos
             }
         }
 
-        public List<CharacterGo> Players { get; set; }
+        public List<CharacterGo> Players { get; set; } = default!;
 
         public byte this[short x, short y] => Data.AsSpan().Slice(4 + y * XLength + x, 1)[0];
 
