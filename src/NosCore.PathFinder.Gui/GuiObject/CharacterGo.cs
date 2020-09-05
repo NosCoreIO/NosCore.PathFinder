@@ -24,8 +24,6 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
         public VisualType? TargetVisualType { get; set; }
 
-        public BrushFire? BrushFire { get; set; }
-
         public short PositionX
         {
             get => MapX;
@@ -38,6 +36,6 @@ namespace NosCore.PathFinder.Gui.GuiObject
             set => MapY = value;
         }
 
-        public MapDto Map { get; set; }
+        public MapDto Map { get; set; } = default!;
     }
 }
