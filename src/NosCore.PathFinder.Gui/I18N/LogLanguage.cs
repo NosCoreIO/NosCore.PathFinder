@@ -14,7 +14,7 @@ namespace NosCore.PathFinder.Gui.I18N
     {
         private static LogLanguage? _instance;
 
-        private static readonly CultureInfo _resourceCulture = new CultureInfo(Language.ToString());
+        private static readonly CultureInfo ResourceCulture = new CultureInfo(Language.ToString());
 
         private readonly ResourceManager _manager;
 
@@ -37,7 +37,7 @@ namespace NosCore.PathFinder.Gui.I18N
 
         public string GetMessageFromKey(LogLanguageKey messageKey, string? culture)
         {
-            var cult = culture != null ? new CultureInfo(culture) : _resourceCulture;
+            var cult = culture != null ? new CultureInfo(culture) : ResourceCulture;
             var resourceMessage = (_manager != null)
                 ? _manager.GetResourceSet(cult, true,
                         cult.TwoLetterISOLanguageName == default(RegionType).ToString().ToLower(cult))

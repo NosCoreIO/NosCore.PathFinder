@@ -73,15 +73,15 @@ namespace NosCore.PathFinder.Gui.Dtos
                 }
             }
 
-            foreach (var cell in cells.OrderBy(_ => RandomHelper.Instance.RandomNumber(0, int.MaxValue)))
+            foreach (var (x, y) in cells.OrderBy(_ => RandomHelper.Instance.RandomNumber(0, int.MaxValue)))
             {
-                if (IsBlockedZone(firstX, firstY, cell.X, cell.Y))
+                if (IsBlockedZone(firstX, firstY, x, y))
                 {
                     continue;
                 }
 
-                firstX = cell.X;
-                firstY = cell.Y;
+                firstX = x;
+                firstY = y;
                 return true;
             }
 

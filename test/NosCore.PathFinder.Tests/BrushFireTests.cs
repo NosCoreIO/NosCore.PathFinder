@@ -45,46 +45,36 @@ namespace NosCore.PathFinder.Tests
         {
             (short X, short Y) characterPosition = (6, 10);
             var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
-            var scale = 50;
-            var bitmap = new Bitmap(_map.XLength * scale, _map.YLength * scale);
-            using var graphics = Graphics.FromImage(bitmap);
+            var bitmap = new Bitmap(_map.XLength * TestHelper.Scale, _map.YLength * TestHelper.Scale);
             var listPixel = new List<Color>();
+            TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, (0, 0), characterPosition);
+            using var graphics = Graphics.FromImage(bitmap);
+
+
             for (short y = 0; y < _map.YLength; y++)
             {
                 for (short x = 0; x < _map.XLength; x++)
                 {
-                    var color = (brushFire[x, y] ?? 0d) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(((brushFire[x, y] ?? 0) * 12 > 255 ? 255 : (brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
-                    if (x == characterPosition.X && y == characterPosition.Y)
+                    var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
+                    if ((x, y) != characterPosition)
                     {
-                        color = Color.DarkRed;
+                        if (brushFire[x, y] != null)
+                        {
+                            graphics.FillRectangle(new Pen(Color.White).Brush, rectangle);
+                            var color = Color.FromArgb((int)((brushFire[x, y] * 12 > 255 ? 255 : (brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
+                            graphics.DrawString(brushFire[x, y]?.ToString("N0"), new Font("Arial", 16), Brushes.Black, rectangle, TestHelper.StringFormat);
+                            graphics.FillRectangle(new Pen(color).Brush, rectangle);
+                            listPixel.Add(color);
+                        }
+                        else
+                        {
+                            graphics.DrawString("∞", new Font("Arial", 16), Brushes.White, rectangle, TestHelper.StringFormat);
+                        }
                     }
-                    var sf = new StringFormat
-                    {
-                        LineAlignment = StringAlignment.Center,
-                        Alignment = StringAlignment.Center
-                    };
-                    var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
-                    graphics.DrawString(brushFire[x, y]?.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
-                    graphics.FillRectangle(new Pen(color).Brush, rectangle);
-                    listPixel.Add(color);
                 }
             }
 
-            var path = Path.GetFullPath("../../../../../documentation/brushfire.png");
-            bitmap.Save(path, ImageFormat.Png);
-
-            var builder = new StringBuilder();
-            builder.AppendLine("# NosCore.Pathfinder's Documentation");
-            builder.AppendLine("## Brushfire");
-            builder.AppendLine("- Filename: brushfire.png");
-            var pixels = string.Join("", listPixel.SelectMany(s => s.Name));
-
-            var checksum =
-                string.Join("", SHA256.Create()
-                    .ComputeHash(Encoding.UTF8.GetBytes(pixels)).Select(s => s.ToString("x2")));
-            builder.AppendLine($"- Checksum: {checksum}");
-            builder.AppendLine("![brushfire](./brushfire.png)");
-            Approvals.Verify(WriterFactory.CreateTextWriter(builder.ToString(), "md"));
+            TestHelper.VerifyFile("brushfire.png", bitmap, listPixel, "Brushfire");
         }
     }
 }

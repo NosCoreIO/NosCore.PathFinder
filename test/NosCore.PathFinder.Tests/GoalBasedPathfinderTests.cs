@@ -8,7 +8,6 @@ using System.Security.Cryptography;
 using System.Text;
 using ApprovalTests;
 using ApprovalTests.Writers;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Heuristic;
@@ -20,28 +19,7 @@ namespace NosCore.PathFinder.Tests
     [TestClass]
     public class GoalBasedPathfinderTests
     {
-        private readonly TestMap _map = new TestMap(new[]
-        {
-            new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1},
-            new byte[] {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-        });
+        private readonly TestMap _map = TestHelper.SimpleMap;
 
         private readonly IPathfinder _goalPathfinder;
         private readonly (short X, short Y) _characterPosition;
@@ -57,64 +35,48 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_GoalBasedPathfinder()
         {
-            var scale = 50;
-            var bitmap = new Bitmap(_map.XLength * scale, _map.YLength * scale);
-            using var graphics = Graphics.FromImage(bitmap);
-            var listPixel = new List<Color>();
+            var bitmap = new Bitmap(_map.XLength * TestHelper.Scale, _map.YLength * TestHelper.Scale);
             (short X, short Y) target = (15, 16);
-            var path = _goalPathfinder.FindPath(target, _characterPosition);
+            var listPixel = new List<Color>();
+            TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, target, _characterPosition);
+            using var graphics = Graphics.FromImage(bitmap);
+
+
             for (short y = 0; y < _map.YLength; y++)
             {
                 for (short x = 0; x < _map.XLength; x++)
                 {
-
-                    var sf = new StringFormat
+                    var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
+                    if ((x, y) != target && (x, y) != _characterPosition)
                     {
-                        LineAlignment = StringAlignment.Center,
-                        Alignment = StringAlignment.Center
-                    };
-                    var rectangle = new Rectangle(x * scale, y * scale, scale, scale);
-                    var color = (_brushFire[x, y] ?? 0d) == 0 ? Color.FromArgb(255, 0, 0, 0) : Color.FromArgb((int)(((_brushFire[x, y] ?? 0) * 12 > 255 ? 255 : (_brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
-                    if (x == _characterPosition.X && y == _characterPosition.Y)
-                    {
-                        color = Color.Green;
+                        if (_brushFire[x, y] != null)
+                        {
+                            graphics.FillRectangle(new Pen(Color.White).Brush, rectangle);
+                            var color = Color.FromArgb((int)((_brushFire[x, y] * 12 > 255 ? 255 : (_brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
+                            graphics.DrawString(_brushFire[x, y]?.ToString("N0"), new Font("Arial", 16), Brushes.Black, rectangle, TestHelper.StringFormat);
+                            graphics.FillRectangle(new Pen(color).Brush, rectangle);
+                            listPixel.Add(color);
+                        }
+                        else
+                        {
+                            graphics.DrawString("∞", new Font("Arial", 16), Brushes.White, rectangle, TestHelper.StringFormat);
+                        }
                     }
-
-                    if (path.Any(s => s.X == x && s.Y == y))
-                    {
-                        color = Color.FromArgb(100, Color.Purple);
-                        graphics.DrawString(Array.IndexOf(path.ToArray(),(x, y)).ToString(), new Font("Arial", 16), Brushes.Black, rectangle, sf);
-                    }
-                    else
-                    {
-                        graphics.DrawString(_brushFire[x, y]?.ToString("N0") ?? "∞", new Font("Arial", 16), Brushes.Black, rectangle, sf);
-                    }
-
-                    if (x == target.X && y == target.Y)
-                    {
-                        color = Color.DarkRed;
-                    }
-
-                    graphics.FillRectangle(new Pen(color).Brush, rectangle);
-                    listPixel.Add(color);
                 }
             }
 
-            var filepath = Path.GetFullPath("../../../../../documentation/goal-based-pathfinder.png");
-            bitmap.Save(filepath, ImageFormat.Png);
 
-            var builder = new StringBuilder();
-            builder.AppendLine("# NosCore.Pathfinder's Documentation");
-            builder.AppendLine("## Goal Based Pathfinder");
-            builder.AppendLine("- Filename: goal-based-pathfinder.png");
-            var pixels = string.Join("", listPixel.SelectMany(s => s.Name));
+            var path = _goalPathfinder.FindPath(target, _characterPosition).ToList();
+            foreach (var (x, y) in path)
+            {
+                var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
+                var color = Color.LightPink;
+                graphics.FillRectangle(new Pen(color).Brush, rectangle);
+                graphics.DrawString(Array.IndexOf(path.ToArray(), (x, y)).ToString(), new Font("Arial", 16), Brushes.Black, rectangle, TestHelper.StringFormat);
+                listPixel.Add(color);
+            }
 
-            var checksum =
-                string.Join("", SHA256.Create()
-                    .ComputeHash(Encoding.UTF8.GetBytes(pixels)).Select(s => s.ToString("x2")));
-            builder.AppendLine($"- Checksum: {checksum}");
-            builder.AppendLine("![brushfire](./goal-based-pathfinder.png)");
-            Approvals.Verify(WriterFactory.CreateTextWriter(builder.ToString(), "md"));
+            TestHelper.VerifyFile("goal-based-pathfinder.png", bitmap, listPixel, "Goal Based Pathfinder");
         }
     }
 }

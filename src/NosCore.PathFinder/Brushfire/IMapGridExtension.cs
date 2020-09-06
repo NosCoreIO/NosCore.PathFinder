@@ -12,7 +12,7 @@ namespace NosCore.PathFinder.Brushfire
             (-1, 1),  (0, 1),  (1, 1)
         };
 
-        public static IEnumerable<(short X, short Y)> GetNeighbors(this IMapGrid grid, (short X, short Y) cell)
+        public static IEnumerable<(short X, short Y)> GetNeighbors(this IMapGrid grid, (short X, short Y) cell, bool includeWalls = false)
         {
             return Neighbours.Where(delta =>
             {
@@ -20,7 +20,8 @@ namespace NosCore.PathFinder.Brushfire
                 var currentY = (short)(cell.Y + delta.Y);
                 return currentX >= 0 && currentX < grid.XLength &&
                         currentY >= 0 && currentY < grid.YLength &&
-                        grid.IsWalkable(currentX, currentY);
+                        (includeWalls || grid.IsWalkable(currentX, currentY)
+                        );
             }).Select(delta => ((short)(cell.X + delta.X), (short)(cell.Y + delta.Y)));
         }
 

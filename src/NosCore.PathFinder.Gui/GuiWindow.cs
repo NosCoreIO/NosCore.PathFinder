@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Mapster;
 using NosCore.PathFinder.Gui.Database;
@@ -27,7 +28,7 @@ namespace NosCore.PathFinder.Gui
 {
     public class GuiWindow : GameWindow
     {
-        private static readonly ILogger Logger = NosCore.Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
+        private static readonly ILogger Logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
         private readonly MapDto _map;
 
         private readonly List<MapMonsterGo> _monsters;
@@ -83,9 +84,9 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.Map = _map;
             }
 
-            Parallel.ForEach(_monsters.Where(s => s.Life == null), monster => monster.StartLife());
-            Parallel.ForEach(_npcs.Where(s => s.Life == null), npc => npc.StartLife());
-
+            Parallel.ForEach(_monsters, monster => monster.StartLife(CancellationToken.None));
+            Parallel.ForEach(_npcs, npc => npc.StartLife(CancellationToken.None));
+            
             var wallpixels = new List<Vector2[]>();
             for (short y = 0; y < _map.YLength; y++)
             {
