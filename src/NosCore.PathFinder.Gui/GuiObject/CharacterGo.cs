@@ -4,7 +4,6 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
-using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.Shared.Enumerations;
 

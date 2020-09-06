@@ -13,7 +13,6 @@ using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.I18N;
 using NosCore.Dao;
 using NosCore.PathFinder.Gui.Dtos;
-using NosCore.PathFinder.Heuristic;
 using NosCore.Shared.Configuration;
 
 namespace NosCore.PathFinder.Gui

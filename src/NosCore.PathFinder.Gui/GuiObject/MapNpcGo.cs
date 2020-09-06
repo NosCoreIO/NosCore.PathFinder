@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
 using NosCore.Shared.Enumerations;
@@ -16,9 +15,7 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
         public short PositionY { get; set; }
 
-        public DateTime LastMove { get; set; }
-
-        public IDisposable? Life { get; set; }
+        public DateTime NextMove { get; set; }
 
         public MapDto Map
         {
@@ -30,9 +27,13 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
         public VisualType? TargetVisualType { get; set; }
 
-        public void StartLife()
+        public async Task StartLife(CancellationToken cancellationToken)
         {
-            Life = Observable.Interval(TimeSpan.FromMilliseconds(400)).Select(_ => this.MoveAsync(new OctileDistanceHeuristic())).Subscribe();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var secondsWalking = await this.MoveAsync(new OctileDistanceHeuristic());
+                await Task.Delay(secondsWalking < IMovableEntity.RefreshRate ? IMovableEntity.RefreshRate - secondsWalking : secondsWalking, cancellationToken);
+            }
         }
     }
 }
