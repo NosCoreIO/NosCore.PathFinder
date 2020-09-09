@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿//  __  _  __    __   ___ __  ___ ___
+// |  \| |/__\ /' _/ / _//__\| _ \ __|
+// | | ' | \/ |`._`.| \_| \/ | v / _|
+// |_|\__|\__/ |___/ \__/\__/|_|_\___|
+// -----------------------------------
+
+using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using ApprovalTests;
-using ApprovalTests.Writers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Heuristic;
