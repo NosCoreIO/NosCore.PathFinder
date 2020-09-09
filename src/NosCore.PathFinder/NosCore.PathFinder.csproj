@@ -35,6 +35,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>NosCore.Pathfinder.Tests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Include="..\..\icon.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>

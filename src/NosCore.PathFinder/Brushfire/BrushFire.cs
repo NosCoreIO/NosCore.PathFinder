@@ -1,11 +1,17 @@
-﻿using System.Collections.Generic;
+﻿//  __  _  __    __   ___ __  ___ ___
+// |  \| |/__\ /' _/ / _//__\| _ \ __|
+// | | ' | \/ |`._`.| \_| \/ | v / _|
+// |_|\__|\__/ |___/ \__/\__/|_|_\___|
+// -----------------------------------
+
+using System.Collections.Generic;
 
 namespace NosCore.PathFinder.Brushfire
 {
     public readonly struct BrushFire
     {
 
-        public BrushFire((short X, short Y) origin, Dictionary<(short X, short Y), BrushFireNode?> brushFireGrid, short length,
+        public BrushFire((short X, short Y) origin, Dictionary<(short X, short Y), Node?> brushFireGrid, short length,
             short width)
         {
             Origin = origin;
@@ -16,7 +22,7 @@ namespace NosCore.PathFinder.Brushfire
 
         public (short X, short Y) Origin { get; }
 
-        public Dictionary<(short X, short Y), BrushFireNode?> Grid { get; }
+        public Dictionary<(short X, short Y), Node?> Grid { get; }
 
         public short Length { get; }
 

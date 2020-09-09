@@ -1,4 +1,10 @@
-﻿using System;
+﻿//  __  _  __    __   ___ __  ___ ___
+// |  \| |/__\ /' _/ / _//__\| _ \ __|
+// | | ' | \/ |`._`.| \_| \/ | v / _|
+// |_|\__|\__/ |___/ \__/\__/|_|_\___|
+// -----------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
@@ -7,8 +13,8 @@ using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Pathfinder
 {
-    [Obsolete("This pathfinder should not be used it won't find the target if a wall is in between. It's only used for testing purpose")]
-    public class LinearPathfinder : IPathfinder
+    [Obsolete("This pathfinder should not be used it won't find the target if a wall is in between. It should only be used when some other system remove walls in between")]
+    internal class LinearPathfinder : IPathfinder
     {
         private readonly IMapGrid _mapGrid;
         public static readonly MemoryCache Cache = new MemoryCache(new MemoryCacheOptions());

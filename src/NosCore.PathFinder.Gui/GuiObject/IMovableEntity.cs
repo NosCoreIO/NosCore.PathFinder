@@ -66,7 +66,7 @@ namespace NosCore.PathFinder.Gui.GuiObject
             }
             else
             {
-                IPathfinder pathfinder = new LinearPathfinder(nonPlayableEntity.Map, distanceCalculator);
+                IPathfinder pathfinder = new JumpPointSearchPathfinder(nonPlayableEntity.Map, distanceCalculator);
                 var target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
                 List<(short X, short Y)>? path = null;
                 if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 20)

@@ -10,11 +10,11 @@ namespace NosCore.PathFinder.Brushfire
 {
     internal class MinHeap
     {
-        private readonly List<BrushFireNode> _array = new List<BrushFireNode>();
+        private readonly List<Node> _array = new List<Node>();
 
         public int Count => _array.Count;
 
-        public BrushFireNode Pop()
+        public Node Pop()
         {
             var ret = _array[0];
             _array[0] = _array[^1];
@@ -47,7 +47,7 @@ namespace NosCore.PathFinder.Brushfire
             return ret;
         }
 
-        public void Push(BrushFireNode element)
+        public void Push(Node element)
         {
             _array.Add(element);
             var c = _array.Count - 1;
@@ -61,6 +61,5 @@ namespace NosCore.PathFinder.Brushfire
                 parent = (c - 1) >> 1;
             }
         }
-
     }
 }
