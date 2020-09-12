@@ -10,11 +10,13 @@ using System.Threading.Tasks;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Heuristic;
 using NosCore.Shared.Enumerations;
+using Serilog;
 
 namespace NosCore.PathFinder.Gui.GuiObject
 {
     public class MapNpcGo : MapNpcDto, IMovableEntity
     {
+        private static readonly ILogger Logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
         public long VisualId => MapNpcId;
 
         public short PositionX { get; set; }
@@ -37,8 +39,18 @@ namespace NosCore.PathFinder.Gui.GuiObject
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var secondsWalking = await this.MoveAsync(new OctileDistanceHeuristic());
-                await Task.Delay(secondsWalking < IMovableEntity.RefreshRate ? IMovableEntity.RefreshRate - secondsWalking : secondsWalking, cancellationToken);
+                try
+                {
+                    var secondsWalking = await this.MoveAsync(new OctileDistanceHeuristic());
+                    await Task.Delay(
+                        secondsWalking < IMovableEntity.RefreshRate
+                            ? IMovableEntity.RefreshRate - secondsWalking
+                            : secondsWalking, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, ex.Message);
+                } 
             }
         }
     }

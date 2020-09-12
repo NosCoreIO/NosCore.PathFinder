@@ -11,8 +11,8 @@ namespace NosCore.PathFinder.Brushfire
     public readonly struct BrushFire
     {
 
-        public BrushFire((short X, short Y) origin, Dictionary<(short X, short Y), Node?> brushFireGrid, short length,
-            short width)
+        public BrushFire((short X, short Y) origin, Dictionary<(short X, short Y), Node?> brushFireGrid, short width,
+            short length)
         {
             Origin = origin;
             Grid = brushFireGrid;

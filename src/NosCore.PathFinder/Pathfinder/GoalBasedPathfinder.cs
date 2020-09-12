@@ -25,8 +25,6 @@ namespace NosCore.PathFinder.Pathfinder
             _heuristic = heuristic;
         }
 
-   
-
         private Node?[,] CacheBrushFire(BrushFire brushFire)
         {
             var Nodes = new Node?[brushFire.Width, brushFire.Length];
@@ -41,7 +39,7 @@ namespace NosCore.PathFinder.Pathfinder
                 var currentNode = new Node(cell.Position, null);
                 Nodes[cell.Position.X, cell.Position.Y] ??= currentNode;
 
-                if (cell.Value > 1 && Nodes[cell.Position.X, cell.Position.Y]!.Closed == false)
+                if (cell.Value > 0 && Nodes[cell.Position.X, cell.Position.Y]!.Closed == false)
                 {
                     currentNode.Parent ??= GetParent(cell.Position);
                 }
@@ -50,16 +48,16 @@ namespace NosCore.PathFinder.Pathfinder
                 return Nodes[cell.Position.X, cell.Position.Y];
 
             }
-            for (short y = 0; y < brushFire.Width; y++)
+            for (short y = 0; y < brushFire.Length; y++)
             {
-                for (short x = 0; x < brushFire.Length; x++)
+                for (short x = 0; x < brushFire.Width; x++)
                 {
-                    if (!(brushFire[x, y] is { } || Nodes[x, y]?.Closed == true))
+                    if (!(brushFire[x, y] is { } || Nodes[x, y]?.Closed == true || Nodes[x, y]?.Parent != null))
                     {
                         continue;
                     }
 
-                    GetParent((x, y));
+                    Nodes[x, y] = new Node((x, y), brushFire[x, y] ?? 0) { Parent = GetParent((x, y)), Closed = true };
                 }
             }
 

@@ -24,8 +24,8 @@ namespace NosCore.PathFinder.Brushfire
             {
                 var currentX = (short)(cell.X + delta.X);
                 var currentY = (short)(cell.Y + delta.Y);
-                return currentX >= 0 && currentX < grid.XLength &&
-                        currentY >= 0 && currentY < grid.YLength &&
+                return currentX >= 0 && currentX < grid.Width &&
+                        currentY >= 0 && currentY < grid.Length &&
                         (includeWalls || grid.IsWalkable(currentX, currentY)
                         );
             }).Select(delta => ((short)(cell.X + delta.X), (short)(cell.Y + delta.Y)));
@@ -33,15 +33,15 @@ namespace NosCore.PathFinder.Brushfire
 
         public static BrushFire LoadBrushFire(this IMapGrid mapGrid, (short X, short Y) user, IHeuristic heuristic, short maxDistance = 22)
         {
-            if (user.X < 0 || user.X >= mapGrid.XLength ||
-                user.Y < 0 || user.Y >= mapGrid.YLength)
+            if (user.X < 0 || user.X >= mapGrid.Width ||
+                user.Y < 0 || user.Y >= mapGrid.Length)
             {
-                return new BrushFire(user, new Dictionary<(short X, short Y), Node?>(), mapGrid.XLength, mapGrid.XLength);
+                return new BrushFire(user, new Dictionary<(short X, short Y), Node?>(), mapGrid.Width, mapGrid.Length);
             }
 
             var path = new MinHeap();
             var cellGrid = new Dictionary<(short X, short Y), Node?>();
-            var grid = new Node?[mapGrid.XLength, mapGrid.YLength];
+            var grid = new Node?[mapGrid.Width, mapGrid.Length];
             grid[user.X, user.Y] = new Node(user, mapGrid[user.X, user.Y])
             {
                 Opened = true
@@ -82,7 +82,7 @@ namespace NosCore.PathFinder.Brushfire
                     neighbors[i]!.Opened = true;
                 }
             }
-            return new BrushFire(user, cellGrid, mapGrid.XLength, mapGrid.XLength);
+            return new BrushFire(user, cellGrid, mapGrid.Width, mapGrid.Length);
         }
 
     }

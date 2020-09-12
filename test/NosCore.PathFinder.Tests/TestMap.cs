@@ -16,8 +16,8 @@ namespace NosCore.PathFinder.Tests
             _data = data;
         }
 
-        public short XLength => (short)(_data.FirstOrDefault()?.Length ?? 0);
-        public short YLength => (short)(_data.FirstOrDefault()?.Length ?? 0);
+        public short Width => (short)(_data.First().Length);
+        public short Length => (short)(_data.Length);
 
         private readonly byte[][] _data;
 
