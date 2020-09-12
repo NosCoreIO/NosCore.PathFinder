@@ -36,13 +36,12 @@ namespace NosCore.PathFinder.Pathfinder
                 path.AddRange(linearPathfinder.FindPath(jumps[i], jumps[i + 1]));
             }
 
-            path.RemoveAt(path.Count - 1);
             return path;
         }
 
         internal IEnumerable<(short X, short Y)> GetJumpList((short X, short Y) start, (short X, short Y) end)
         {
-            var Nodes = new JumpNode?[_mapGrid.XLength, _mapGrid.YLength];
+            var Nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Length];
             var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
             Nodes[start.X, start.Y] = startNode;
             var heap = new MinHeap();

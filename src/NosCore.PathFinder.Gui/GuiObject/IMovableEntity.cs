@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Gui.Dtos;
 using NosCore.PathFinder.Interfaces;
 using NosCore.PathFinder.Pathfinder;
@@ -98,7 +99,10 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
                     if (targetFound == false)
                     {
-                        nonPlayableEntity.TargetVisualType = VisualType.Map;
+
+                        nonPlayableEntity.TargetVisualType = (nonPlayableEntity.MapX, nonPlayableEntity.MapY) !=
+                                                             (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY) ? VisualType.Map : (VisualType?)null;
+
                         nonPlayableEntity.TargetVisualId = null;
                     }
                 }
@@ -107,8 +111,7 @@ namespace NosCore.PathFinder.Gui.GuiObject
                     path = pathfinder.FindPath((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY),
                         (nonPlayableEntity.MapX, nonPlayableEntity.MapY)).ToList();
 
-                    if (path.Count <= cellPerSec &&
-                        path.LastOrDefault() == (nonPlayableEntity.MapX, nonPlayableEntity.MapY))
+                    if (path.Count <= cellPerSec && path.LastOrDefault() == (nonPlayableEntity.MapX, nonPlayableEntity.MapY))
                     {
                         nonPlayableEntity.TargetVisualType = null;
                     }

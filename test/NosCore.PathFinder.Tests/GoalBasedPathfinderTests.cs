@@ -35,16 +35,16 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_GoalBasedPathfinder()
         {
-            var bitmap = new Bitmap(_map.XLength * TestHelper.Scale, _map.YLength * TestHelper.Scale);
+            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Length * TestHelper.Scale);
             (short X, short Y) target = (15, 16);
             var listPixel = new List<Color>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, target, _characterPosition);
             using var graphics = Graphics.FromImage(bitmap);
 
 
-            for (short y = 0; y < _map.YLength; y++)
+            for (short y = 0; y < _map.Length; y++)
             {
-                for (short x = 0; x < _map.XLength; x++)
+                for (short x = 0; x < _map.Width; x++)
                 {
                     var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
                     if ((x, y) != target && (x, y) != _characterPosition)
@@ -69,11 +69,16 @@ namespace NosCore.PathFinder.Tests
             var path = _goalPathfinder.FindPath(target, _characterPosition).ToList();
             foreach (var (x, y) in path)
             {
-                var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
-                var color = Color.LightPink;
-                graphics.FillRectangle(new Pen(color).Brush, rectangle);
-                graphics.DrawString(Array.IndexOf(path.ToArray(), (x, y)).ToString(), new Font("Arial", 16), Brushes.Black, rectangle, TestHelper.StringFormat);
-                listPixel.Add(color);
+                if ((x, y) != target && (x, y) != _characterPosition)
+                {
+                    var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale,
+                        TestHelper.Scale);
+                    var color = Color.LightPink;
+                    graphics.FillRectangle(new Pen(color).Brush, rectangle);
+                    graphics.DrawString(Array.IndexOf(path.ToArray(), (x, y)).ToString(), new Font("Arial", 16),
+                        Brushes.Black, rectangle, TestHelper.StringFormat);
+                    listPixel.Add(color);
+                }
             }
 
             TestHelper.VerifyFile("goal-based-pathfinder.png", bitmap, listPixel, "Goal Based Pathfinder");

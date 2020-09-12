@@ -23,7 +23,7 @@ namespace NosCore.PathFinder.Gui.Dtos
 
         private short _yLength;
 
-        public short XLength
+        public short Width
         {
             get
             {
@@ -36,7 +36,7 @@ namespace NosCore.PathFinder.Gui.Dtos
             }
         }
 
-        public short YLength
+        public short Length
         {
             get
             {
@@ -51,7 +51,7 @@ namespace NosCore.PathFinder.Gui.Dtos
 
         public List<CharacterGo> Players { get; set; } = default!;
 
-        public byte this[short x, short y] => Data.AsSpan().Slice(4 + y * XLength + x, 1)[0];
+        public byte this[short x, short y] => Data.AsSpan().Slice(4 + y * Width + x, 1)[0];
 
         internal bool GetFreePosition(ref short firstX, ref short firstY, byte xpoint, byte ypoint)
         {
@@ -117,7 +117,7 @@ namespace NosCore.PathFinder.Gui.Dtos
 
         public bool IsWalkable(short mapX, short mapY)
         {
-            if ((mapX > XLength) || (mapX < 0) || (mapY > YLength) || (mapY < 0))
+            if ((mapX >= Width) || (mapX < 0) || (mapY >= Length) || (mapY < 0))
             {
                 return false;
             }

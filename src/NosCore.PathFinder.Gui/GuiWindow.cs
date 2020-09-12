@@ -45,15 +45,15 @@ namespace NosCore.PathFinder.Gui
         private Dictionary<Color, Vector2[]>? _brushFirePixels;
 
         public GuiWindow(MapDto map, int width, int height, string title, DataAccessHelper dbContextBuilder)
-            : base(width, (height < width / map.XLength * map.YLength) ? width / map.XLength * map.YLength : height,
+            : base(width, (height < width / map.Width * map.Length) ? width / map.Width * map.Length : height,
                 GraphicsMode.Default, title)
         {
             var dbContextBuilder1 = dbContextBuilder;
             var mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1);
             var mapNpcDao = new Dao<MapNpc, MapNpcDto, int>(Logger, dbContextBuilder1);
             _originalWidth = Width;
-            _originalCellSize = Width / map.XLength;
-            _cellSize = Width / map.XLength;
+            _originalCellSize = Width / map.Width;
+            _cellSize = Width / map.Width;
 
             _monsters = mapMonsterDao.Where(s => s.MapId == map.MapId)?.Adapt<List<MapMonsterGo>>() ??
                         new List<MapMonsterGo>();
@@ -88,9 +88,9 @@ namespace NosCore.PathFinder.Gui
             Parallel.ForEach(_npcs, npc => npc.StartLife(CancellationToken.None));
             
             var wallpixels = new List<Vector2[]>();
-            for (short y = 0; y < _map.YLength; y++)
+            for (short y = 0; y < _map.Length; y++)
             {
-                for (short x = 0; x < _map.XLength; x++)
+                for (short x = 0; x < _map.Width; x++)
                 {
                     if (_map[x, y] > 0)
                     {

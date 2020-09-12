@@ -45,9 +45,9 @@ namespace NosCore.PathFinder.Pathfinder
                 }
             } while (currentNode != end && _mapGrid.IsWalkable(currentNode.X, currentNode.Y));
 
-            for (var i = 1; i < list.Count; i++)
+            for (var i = 0; i < list.Count; i++)
             {
-                Cache.Set((list[i - 1], end), list.Skip(i), DateTimeOffset.Now.AddSeconds(10));
+                Cache.Set((list[i], end), list.Skip(i), DateTimeOffset.Now.AddSeconds(10));
             }
             return list;
         }
