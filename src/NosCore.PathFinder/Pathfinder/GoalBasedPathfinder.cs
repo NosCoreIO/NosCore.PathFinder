@@ -39,12 +39,12 @@ namespace NosCore.PathFinder.Pathfinder
                 var currentNode = new Node(cell.Position, null);
                 Nodes[cell.Position.X, cell.Position.Y] ??= currentNode;
 
-                if (cell.Value > 0 && Nodes[cell.Position.X, cell.Position.Y]!.Closed == false)
+                if (cell.Value > 0 && Nodes[cell.Position.X, cell.Position.Y]!.Opened == false)
                 {
                     currentNode.Parent ??= GetParent(cell.Position);
                 }
 
-                Nodes[cell.Position.X, cell.Position.Y]!.Closed = true;
+                Nodes[cell.Position.X, cell.Position.Y]!.Opened = true;
                 return Nodes[cell.Position.X, cell.Position.Y];
 
             }
@@ -52,12 +52,12 @@ namespace NosCore.PathFinder.Pathfinder
             {
                 for (short x = 0; x < brushFire.Width; x++)
                 {
-                    if (!(brushFire[x, y] is { } || Nodes[x, y]?.Closed == true || Nodes[x, y]?.Parent != null))
+                    if (!(brushFire[x, y] is { } || Nodes[x, y]?.Opened == true || Nodes[x, y]?.Parent != null))
                     {
                         continue;
                     }
 
-                    Nodes[x, y] = new Node((x, y), brushFire[x, y] ?? 0) { Parent = GetParent((x, y)), Closed = true };
+                    Nodes[x, y] = new Node((x, y), brushFire[x, y] ?? 0) { Parent = GetParent((x, y)), Opened = true };
                 }
             }
 

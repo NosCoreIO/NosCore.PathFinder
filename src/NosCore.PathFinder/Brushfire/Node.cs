@@ -26,8 +26,6 @@ namespace NosCore.PathFinder.Brushfire
         }
         public bool Opened { get; set; }
 
-        public bool Closed { get; set; }
-
         public Node? Parent { get; set; }
 
         public double F { get; set; }

@@ -5,6 +5,7 @@
 // -----------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using NosCore.PathFinder.Gui.GuiObject;
@@ -49,45 +50,33 @@ namespace NosCore.PathFinder.Gui.Dtos
             }
         }
 
-        public List<CharacterGo> Players { get; set; } = default!;
+        public ConcurrentDictionary<long, CharacterGo> Players { get; set; } =
+            new ConcurrentDictionary<long, CharacterGo>();
 
         public byte this[short x, short y] => Data.AsSpan().Slice(4 + y * Width + x, 1)[0];
 
-        internal bool GetFreePosition(ref short firstX, ref short firstY, byte xpoint, byte ypoint)
+        internal (short X, short Y)? GetFreePosition(short firstX, short firstY, byte xradius, byte yradius)
         {
-            var minX = (short)(-xpoint + firstX);
-            var maxX = (short)(xpoint + firstX);
-
-            var minY = (short)(-ypoint + firstY);
-            var maxY = (short)(ypoint + firstY);
-
-            var cells = new List<(short X, short Y)>();
-            for (var y = minY; y <= maxY; y++)
+            IEnumerable<(short X, short Y)?> GetCellsInRadius()
             {
-                for (var x = minX; x <= maxX; x++)
+                for (var y = -yradius; y <= yradius; y++)
                 {
-                    if ((x != firstX) || (y != firstY))
+                    var projectedY = (short) Math.Clamp(y + firstY, 0, short.MaxValue);
+                    for (var x = -xradius; x <= xradius; x++)
                     {
-                        cells.Add((x, y));
+                        if ((x != firstX) || (y != firstY))
+                        {
+                            yield return ((short)Math.Clamp(x + firstX, 0, short.MaxValue), projectedY);
+                        }
                     }
                 }
             }
 
-            foreach (var (x, y) in cells.OrderBy(_ => RandomHelper.Instance.RandomNumber(0, int.MaxValue)))
-            {
-                if (IsBlockedZone(firstX, firstY, x, y))
-                {
-                    continue;
-                }
-
-                firstX = x;
-                firstY = y;
-                return true;
-            }
-
-            return false;
+            return GetCellsInRadius().OrderBy(_ => RandomHelper.Instance.RandomNumber(0, int.MaxValue))
+                .FirstOrDefault(c => !IsBlockedZone(firstX, firstY, c!.Value.X, c.Value.Y));
         }
 
+        //todo fix that stupid method
         public bool IsBlockedZone(short firstX, short firstY, short mapX, short mapY)
         {
             var posX = (short)Math.Abs(mapX - firstX);

@@ -58,24 +58,24 @@ namespace NosCore.PathFinder.Gui.GuiObject
             if (nonPlayableEntity.TargetVisualId == null && nonPlayableEntity.TargetVisualType != VisualType.Map)
             {
                 nonPlayableEntity.NextMove = DateTime.Now.AddMilliseconds(RandomHelper.Instance.RandomNumber(IMovableEntity.RefreshRate, 2500 + IMovableEntity.RefreshRate));
-                if (!nonPlayableEntity.Map.GetFreePosition(ref mapX, ref mapY,
+                var freeCell = nonPlayableEntity.Map.GetFreePosition(mapX, mapY,
                     (byte)RandomHelper.Instance.RandomNumber(0, 3),
-                    (byte)RandomHelper.Instance.RandomNumber(0, 3)))
+                    (byte)RandomHelper.Instance.RandomNumber(0, 3));
+                if (freeCell == null)
                 {
                     return 0;
                 }
+
+                mapX = freeCell.Value.X;
+                mapY = freeCell.Value.Y;
             }
             else
             {
                 IPathfinder pathfinder = new JumpPointSearchPathfinder(nonPlayableEntity.Map, distanceCalculator);
-                var target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
                 List<(short X, short Y)>? path = null;
-                if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 20)
+                if (nonPlayableEntity.TargetVisualId != null && nonPlayableEntity.Map.Players.TryGetValue((long)nonPlayableEntity.TargetVisualId, out var target) && distanceCalculator.GetDistance((target.PositionX, target.PositionY), (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 20)
                 {
-                    path = pathfinder.FindPath((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY),
-                        (target.PositionX, target.PositionY)).ToList();
-
-                    if (path.LastOrDefault() != (target.PositionX, target.PositionY))
+                    if (path?.LastOrDefault() != (target.PositionX, target.PositionY))
                     {
                         var goalPathFinder = new GoalBasedPathfinder(nonPlayableEntity.Map, distanceCalculator);
                         path = goalPathFinder.FindPath((nonPlayableEntity.PositionX, nonPlayableEntity.PositionY),
@@ -87,8 +87,7 @@ namespace NosCore.PathFinder.Gui.GuiObject
                     var targetFound = false;
                     for (var i = 0; i < 10; i++)
                     {
-                        target = nonPlayableEntity.Map.Players.FirstOrDefault(s => s.VisualId == nonPlayableEntity.TargetVisualId);
-                        if (target != null && distanceCalculator.GetDistance((target.PositionX, target.PositionY),
+                        if (nonPlayableEntity.TargetVisualId != null && nonPlayableEntity.Map.Players.TryGetValue((long)nonPlayableEntity.TargetVisualId, out target) && distanceCalculator.GetDistance((target.PositionX, target.PositionY),
                             (nonPlayableEntity.PositionX, nonPlayableEntity.PositionY)) < 20)
                         {
                             targetFound = true;

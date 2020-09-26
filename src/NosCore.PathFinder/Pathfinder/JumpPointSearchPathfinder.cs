@@ -4,6 +4,7 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
@@ -26,6 +27,10 @@ namespace NosCore.PathFinder.Pathfinder
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
+            if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)> cachedList))
+            {
+                return cachedList;
+            }
 #pragma warning disable 618
             var linearPathfinder = new LinearPathfinder(_mapGrid, _heuristic);
 #pragma warning restore 618
@@ -35,30 +40,35 @@ namespace NosCore.PathFinder.Pathfinder
             {
                 path.AddRange(linearPathfinder.FindPath(jumps[i], jumps[i + 1]));
             }
-
+            for (var i = 0; i < path.Count; i++)
+            {
+                Cache.Set((path[i], end), path.Skip(i), DateTimeOffset.Now.AddSeconds(10));
+            }
             return path;
         }
 
         internal IEnumerable<(short X, short Y)> GetJumpList((short X, short Y) start, (short X, short Y) end)
         {
-            var Nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Length];
-            var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
-            Nodes[start.X, start.Y] = startNode;
-            var heap = new MinHeap();
-            heap.Push(startNode);
-
-            while (heap.Count != 0)
+            var nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Length];
+            if (_mapGrid.IsWalkable(start.X, start.Y) && _mapGrid.IsWalkable(end.X, end.Y))
             {
-                var node = heap.Pop();
+                var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
+                nodes[start.X, start.Y] = startNode;
+                var heap = new MinHeap();
+                heap.Push(startNode);
 
-                if (node.Position == end)
+                while (heap.Count != 0)
                 {
-                    return Trace(node);
+                    var node = heap.Pop();
+                    if (node.Position == end)
+                    {
+                        return Trace(node);
+                    }
+
+                    node.Opened = true;
+                    IdentifySuccessors((JumpNode)node, nodes, end, heap);
                 }
-
-                IdentitySuccessors((JumpNode)node, Nodes, end, heap);
             }
-
             return new (short X, short Y)[0];
         }
 
@@ -74,7 +84,7 @@ namespace NosCore.PathFinder.Pathfinder
             return path.Select(s => s.Position).ToList();
         }
 
-        private void IdentitySuccessors(JumpNode node, JumpNode?[,] Nodes, (short X, short Y) end, MinHeap heap)
+        private void IdentifySuccessors(JumpNode node, JumpNode?[,] Nodes, (short X, short Y) end, MinHeap heap)
         {
             foreach (var neighbour in _mapGrid.GetNeighbors(node.Position))
             {
@@ -89,7 +99,7 @@ namespace NosCore.PathFinder.Pathfinder
                                    _mapGrid[jumpPoint.Value.X, jumpPoint.Value.Y]);
                 Nodes[jumpPoint.Value.X, jumpPoint.Value.Y] = jumpNode;
 
-                if (jumpNode.Closed)
+                if (jumpNode.Opened)
                 {
                     continue;
                 }
@@ -123,8 +133,8 @@ namespace NosCore.PathFinder.Pathfinder
         {
             var x = current.X;
             var y = current.Y;
-            var dx = current.X - proposed.X;
-            var dy = current.Y - proposed.Y;
+            var dx = x - proposed.X;
+            var dy = y - proposed.Y;
 
             if (!_mapGrid.IsWalkable(x, y))
             {

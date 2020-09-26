@@ -5,6 +5,7 @@
 // -----------------------------------
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -62,10 +63,7 @@ namespace NosCore.PathFinder.Gui
             {
                 VisualId = 1
             };
-            _map.Players = new List<CharacterGo>
-            {
-                _mouseCharacter
-            };
+            _map.Players.TryAdd(1, _mouseCharacter);
 
             foreach (var mapMonster in _monsters)
             {
@@ -86,7 +84,7 @@ namespace NosCore.PathFinder.Gui
 
             Parallel.ForEach(_monsters, monster => monster.StartLife(CancellationToken.None));
             Parallel.ForEach(_npcs, npc => npc.StartLife(CancellationToken.None));
-            
+
             var wallpixels = new List<Vector2[]>();
             for (short y = 0; y < _map.Length; y++)
             {
