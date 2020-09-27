@@ -49,6 +49,21 @@ namespace NosCore.PathFinder.Gui.GuiObject
 
     public static class MovableEntityExtension
     {
+        static IEnumerable<(short X, short Y)?> GetCellsInRadius(short firstX, short firstY, byte xradius, byte yradius)
+        {
+            for (var y = -yradius; y <= yradius; y++)
+            {
+                var projectedY = (short)Math.Clamp(y + firstY, 0, short.MaxValue);
+                for (var x = -xradius; x <= xradius; x++)
+                {
+                    if ((x != firstX) || (y != firstY))
+                    {
+                        yield return ((short)Math.Clamp(x + firstX, 0, short.MaxValue), projectedY);
+                    }
+                }
+            }
+        }
+
         public static async Task<int> MoveAsync(this IMovableEntity nonPlayableEntity, IHeuristic distanceCalculator)
         {
             var cellPerSec = 2.5 * nonPlayableEntity.Speed;
@@ -58,9 +73,39 @@ namespace NosCore.PathFinder.Gui.GuiObject
             if (nonPlayableEntity.TargetVisualId == null && nonPlayableEntity.TargetVisualType != VisualType.Map)
             {
                 nonPlayableEntity.NextMove = DateTime.Now.AddMilliseconds(RandomHelper.Instance.RandomNumber(IMovableEntity.RefreshRate, 2500 + IMovableEntity.RefreshRate));
-                var freeCell = nonPlayableEntity.Map.GetFreePosition(mapX, mapY,
+
+                var freeCell = GetCellsInRadius(mapX, mapY,
                     (byte)RandomHelper.Instance.RandomNumber(0, 3),
-                    (byte)RandomHelper.Instance.RandomNumber(0, 3));
+                    (byte)RandomHelper.Instance.RandomNumber(0, 3)).OrderBy(_ => RandomHelper.Instance.RandomNumber(0, int.MaxValue))
+                    .FirstOrDefault(c =>
+                    {
+                        var fromGrid = (c!.Value.X, c!.Value.Y);
+                        while (fromGrid.X != mapX || fromGrid.Y != mapY)
+                        {
+                            var dX = mapX - fromGrid.X;
+                            var dY = mapY - fromGrid.Y;
+
+                            var nDx = 0;
+                            var nDy = 0;
+                            if (dX != 0)
+                            {
+                                nDx = (dX / Math.Abs(dX));
+                            }
+                            if (dY != 0)
+                            {
+                                nDy = (dY / Math.Abs(dY));
+                            }
+
+                            if (!nonPlayableEntity.Map.IsWalkable(fromGrid.X, fromGrid.Y))
+                            {
+                                return false;
+                            }
+                            fromGrid.X += (short)nDx;
+                            fromGrid.Y += (short)nDy;
+                        }
+
+                        return true;
+                    });
                 if (freeCell == null)
                 {
                     return 0;

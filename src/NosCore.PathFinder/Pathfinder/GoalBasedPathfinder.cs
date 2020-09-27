@@ -27,7 +27,7 @@ namespace NosCore.PathFinder.Pathfinder
 
         private Node?[,] CacheBrushFire(BrushFire brushFire)
         {
-            var Nodes = new Node?[brushFire.Width, brushFire.Length];
+            var nodes = new Node?[brushFire.Width, brushFire.Length];
             Node? GetParent((short X, short Y) currentnode)
             {
                 var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new Node((s.X, s.Y), brushFire[s.X, s.Y] ?? 0)).OrderBy(s => s.Value).FirstOrDefault();
@@ -37,32 +37,32 @@ namespace NosCore.PathFinder.Pathfinder
                 }
 
                 var currentNode = new Node(cell.Position, null);
-                Nodes[cell.Position.X, cell.Position.Y] ??= currentNode;
+                nodes[cell.Position.X, cell.Position.Y] ??= currentNode;
 
-                if (cell.Value > 0 && Nodes[cell.Position.X, cell.Position.Y]!.Opened == false)
+                if (cell.Value > 0 && nodes[cell.Position.X, cell.Position.Y]!.Closed == false)
                 {
                     currentNode.Parent ??= GetParent(cell.Position);
                 }
 
-                Nodes[cell.Position.X, cell.Position.Y]!.Opened = true;
-                return Nodes[cell.Position.X, cell.Position.Y];
+                nodes[cell.Position.X, cell.Position.Y]!.Closed = true;
+                return nodes[cell.Position.X, cell.Position.Y];
 
             }
             for (short y = 0; y < brushFire.Length; y++)
             {
                 for (short x = 0; x < brushFire.Width; x++)
                 {
-                    if (!(brushFire[x, y] is { } || Nodes[x, y]?.Opened == true || Nodes[x, y]?.Parent != null))
+                    if (!(brushFire[x, y] is { } || nodes[x, y]?.Closed == true || nodes[x, y]?.Parent != null))
                     {
                         continue;
                     }
 
-                    Nodes[x, y] = new Node((x, y), brushFire[x, y] ?? 0) { Parent = GetParent((x, y)), Opened = true };
+                    nodes[x, y] = new Node((x, y), brushFire[x, y] ?? 0) { Parent = GetParent((x, y)), Closed = true };
                 }
             }
 
-            BrushFirecache.Set(brushFire.Origin, Nodes, DateTimeOffset.Now.AddSeconds(10));
-            return Nodes;
+            BrushFirecache.Set(brushFire.Origin, nodes, DateTimeOffset.Now.AddSeconds(10));
+            return nodes;
         }
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)

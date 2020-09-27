@@ -25,21 +25,46 @@ namespace NosCore.PathFinder.Pathfinder
             _heuristic = heuristic;
         }
 
+        List<(short X, short Y)> BuildFullPath(List<(short X, short Y)> routeFound)
+        {
+            var path = new List<(short X, short Y)>();
+            for (var routeTrav = 0; routeTrav < routeFound.Count - 1; routeTrav++)
+            {
+                var fromGrid = routeFound[routeTrav];
+                var toGrid = routeFound[routeTrav + 1];
+                var dX = toGrid.X - fromGrid.X;
+                var dY = toGrid.Y - fromGrid.Y;
+
+                var nDx = 0;
+                var nDy = 0;
+                if (dX != 0)
+                {
+                    nDx = (dX / Math.Abs(dX));
+                }
+                if (dY != 0)
+                {
+                    nDy = (dY / Math.Abs(dY));
+                }
+
+                while (fromGrid.X != toGrid.X || fromGrid.Y != toGrid.Y)
+                {
+                    fromGrid.X += (short)nDx;
+                    fromGrid.Y += (short)nDy;
+                    path.Add(fromGrid);
+                }
+            }
+
+            return path;
+        }
+
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
             if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)> cachedList))
             {
                 return cachedList;
             }
-#pragma warning disable 618
-            var linearPathfinder = new LinearPathfinder(_mapGrid, _heuristic);
-#pragma warning restore 618
-            var path = new List<(short X, short Y)>();
-            var jumps = GetJumpList(start, end).ToList();
-            for (var i = 0; i < jumps.Count - 1; i++)
-            {
-                path.AddRange(linearPathfinder.FindPath(jumps[i], jumps[i + 1]));
-            }
+
+            var path = BuildFullPath(GetJumpList(start, end).ToList());
             for (var i = 0; i < path.Count; i++)
             {
                 Cache.Set((path[i], end), path.Skip(i), DateTimeOffset.Now.AddSeconds(10));
@@ -60,12 +85,12 @@ namespace NosCore.PathFinder.Pathfinder
                 while (heap.Count != 0)
                 {
                     var node = heap.Pop();
+                    node.Closed = true;
                     if (node.Position == end)
                     {
                         return Trace(node);
                     }
 
-                    node.Opened = true;
                     IdentifySuccessors((JumpNode)node, nodes, end, heap);
                 }
             }
@@ -84,7 +109,7 @@ namespace NosCore.PathFinder.Pathfinder
             return path.Select(s => s.Position).ToList();
         }
 
-        private void IdentifySuccessors(JumpNode node, JumpNode?[,] Nodes, (short X, short Y) end, MinHeap heap)
+        private void IdentifySuccessors(JumpNode node, JumpNode?[,] nodes, (short X, short Y) end, MinHeap heap)
         {
             foreach (var neighbour in _mapGrid.GetNeighbors(node.Position))
             {
@@ -94,12 +119,12 @@ namespace NosCore.PathFinder.Pathfinder
                     continue;
                 }
 
-                var jumpNode = Nodes[jumpPoint.Value.X, jumpPoint.Value.Y] ??
+                var jumpNode = nodes[jumpPoint.Value.X, jumpPoint.Value.Y] ??
                                new JumpNode((jumpPoint.Value.X, jumpPoint.Value.Y),
                                    _mapGrid[jumpPoint.Value.X, jumpPoint.Value.Y]);
-                Nodes[jumpPoint.Value.X, jumpPoint.Value.Y] = jumpNode;
+                nodes[jumpPoint.Value.X, jumpPoint.Value.Y] = jumpNode;
 
-                if (jumpNode.Opened)
+                if (jumpNode.Closed)
                 {
                     continue;
                 }
@@ -111,7 +136,6 @@ namespace NosCore.PathFinder.Pathfinder
                 {
                     continue;
                 }
-
                 jumpNode.G = ng;
                 jumpNode.H ??= _heuristic.GetDistance(jumpPoint.Value, end);
                 jumpNode.F = jumpNode.G + jumpNode.H.Value;
@@ -121,10 +145,6 @@ namespace NosCore.PathFinder.Pathfinder
                 {
                     heap.Push(jumpNode);
                     jumpNode.Opened = true;
-                }
-                else
-                {
-                    heap.Push(jumpNode);
                 }
             }
         }

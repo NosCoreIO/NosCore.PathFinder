@@ -20,6 +20,8 @@ namespace NosCore.PathFinder.Brushfire
 
         public double? H { get; set; }
 
+        public bool Opened { get; set; }
+
         public int CompareTo(JumpNode other)
         {
             return F > other.F ? 1 : F < other.F ? -1 : 0;
