@@ -25,63 +25,55 @@ namespace NosCore.PathFinder.Pathfinder
             _heuristic = heuristic;
         }
 
-        private Node?[,] CacheBrushFire(BrushFire brushFire)
+        private BrushFire CacheBrushFire(BrushFire brushFire, (short X, short Y) start)
         {
-            var Nodes = new Node?[brushFire.Width, brushFire.Length];
             Node? GetParent((short X, short Y) currentnode)
             {
-                var newnode = _mapGrid.GetNeighbors(currentnode).Select(s => new Node((s.X, s.Y), brushFire[s.X, s.Y] ?? 0)).OrderBy(s => s.Value).FirstOrDefault();
-                if (!(newnode is { } cell))
+                var neighbor = _mapGrid.GetNeighbors(currentnode).Select(s => new Node((s.X, s.Y), brushFire.Grid[(s.X, s.Y)]?.Value ?? 0)).OrderBy(s => s.Value).FirstOrDefault();
+                if (!(neighbor is { } neighborCell))
                 {
                     return null;
                 }
 
-                var currentNode = new Node(cell.Position, null);
-                Nodes[cell.Position.X, cell.Position.Y] ??= currentNode;
+                brushFire.Grid[(neighborCell.Position.X, neighborCell.Position.Y)] ??= new Node(neighborCell.Position, null);
 
-                if (cell.Value > 0 && Nodes[cell.Position.X, cell.Position.Y]!.Closed == false)
+                if (neighborCell.Value > 0 && brushFire.Grid[(neighborCell.Position.X, neighborCell.Position.Y)]!.Closed == false)
                 {
-                    currentNode.Parent ??= GetParent(cell.Position);
-                }
-
-                Nodes[cell.Position.X, cell.Position.Y]!.Closed = true;
-                return Nodes[cell.Position.X, cell.Position.Y];
-
-            }
-            for (short y = 0; y < brushFire.Length; y++)
-            {
-                for (short x = 0; x < brushFire.Width; x++)
-                {
-                    if (!(brushFire[x, y] is { } || Nodes[x, y]?.Closed == true || Nodes[x, y]?.Parent != null))
+                    var parent = GetParent(neighborCell.Position);
+                    if (parent != null)
                     {
-                        continue;
+                        brushFire.Grid[(neighborCell.Position.X, neighborCell.Position.Y)]!.Parent ??= parent;
+                        brushFire.Grid[(parent.Position.X, parent.Position.Y)] = parent;
                     }
-
-                    Nodes[x, y] = new Node((x, y), brushFire[x, y] ?? 0) { Parent = GetParent((x, y)), Closed = true };
                 }
+
+                brushFire.Grid[(neighborCell.Position.X, neighborCell.Position.Y)]!.Closed = true;
+                return brushFire.Grid[(neighborCell.Position.X, neighborCell.Position.Y)];
+
             }
 
-            BrushFirecache.Set(brushFire.Origin, Nodes, DateTimeOffset.Now.AddSeconds(10));
-            return Nodes;
+            brushFire.Grid[(start.X, start.Y)] = new Node((start.X, start.Y), brushFire.Grid[(start.X, start.Y)]?.Value ?? 0) { Parent = GetParent((start.X, start.Y)), Closed = true };
+            BrushFirecache.Set(brushFire.Origin, brushFire, DateTimeOffset.Now.AddSeconds(10));
+            return brushFire;
         }
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
             List<(short X, short Y)> list = new List<(short X, short Y)>();
-            BrushFirecache.TryGetValue(end, out Node?[,]? brushFireOut);
+            BrushFirecache.TryGetValue(end, out BrushFire? brushFireOut);
 
             if (!_mapGrid.IsWalkable(start.X, start.Y) || !_mapGrid.IsWalkable(end.X, end.Y))
             {
                 return list;
             }
 
-            if (brushFireOut == null)
+            if (brushFireOut?.Grid[(start.X, start.Y)]?.Parent == null)
             {
-                var brushFire = _mapGrid.LoadBrushFire(end, _heuristic);
-                brushFireOut = CacheBrushFire(brushFire);
+                var brushFire = brushFireOut ?? _mapGrid.LoadBrushFire(end, _heuristic);
+                brushFireOut = CacheBrushFire(brushFire, start);
             }
 
-            if (!(brushFireOut[start.X, start.Y] is { } currentnode)) return list;
+            if (!(brushFireOut?.Grid[(start.X, start.Y)] is { } currentnode)) return list;
             while (currentnode.Parent != null && currentnode.Parent.Position != (start))
             {
                 list.Add(currentnode.Parent.Position);

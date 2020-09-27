@@ -24,8 +24,6 @@ namespace NosCore.PathFinder.Brushfire
         {
             return F > other.F ? 1 : F < other.F ? -1 : 0;
         }
-        public bool Opened { get; set; }
-
         public bool Closed { get; set; }
 
         public Node? Parent { get; set; }

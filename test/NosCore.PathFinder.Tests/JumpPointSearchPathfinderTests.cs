@@ -25,9 +25,7 @@ namespace NosCore.PathFinder.Tests
         public JumpPointSearchPathfinderTests()
         {
             _characterPosition = (6, 10);
-#pragma warning disable CS0618 // Type or member is obsolete
             _jumpPointSearchPathfinder = new JumpPointSearchPathfinder(_map, new OctileDistanceHeuristic());
-#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         [TestMethod]

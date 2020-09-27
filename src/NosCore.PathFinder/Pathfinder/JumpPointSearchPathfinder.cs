@@ -4,6 +4,7 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
@@ -24,41 +25,75 @@ namespace NosCore.PathFinder.Pathfinder
             _heuristic = heuristic;
         }
 
-        public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
+        List<(short X, short Y)> BuildFullPath(List<(short X, short Y)> routeFound)
         {
-#pragma warning disable 618
-            var linearPathfinder = new LinearPathfinder(_mapGrid, _heuristic);
-#pragma warning restore 618
             var path = new List<(short X, short Y)>();
-            var jumps = GetJumpList(start, end).ToList();
-            for (var i = 0; i < jumps.Count - 1; i++)
+            for (var routeTrav = 0; routeTrav < routeFound.Count - 1; routeTrav++)
             {
-                path.AddRange(linearPathfinder.FindPath(jumps[i], jumps[i + 1]));
+                var fromGrid = routeFound[routeTrav];
+                var toGrid = routeFound[routeTrav + 1];
+                var dX = toGrid.X - fromGrid.X;
+                var dY = toGrid.Y - fromGrid.Y;
+
+                var nDx = 0;
+                var nDy = 0;
+                if (dX != 0)
+                {
+                    nDx = (dX / Math.Abs(dX));
+                }
+                if (dY != 0)
+                {
+                    nDy = (dY / Math.Abs(dY));
+                }
+
+                while (fromGrid.X != toGrid.X || fromGrid.Y != toGrid.Y)
+                {
+                    fromGrid.X += (short)nDx;
+                    fromGrid.Y += (short)nDy;
+                    path.Add(fromGrid);
+                }
             }
 
             return path;
         }
 
-        internal IEnumerable<(short X, short Y)> GetJumpList((short X, short Y) start, (short X, short Y) end)
+        public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
-            var Nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Length];
-            var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
-            Nodes[start.X, start.Y] = startNode;
-            var heap = new MinHeap();
-            heap.Push(startNode);
-
-            while (heap.Count != 0)
+            if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)> cachedList))
             {
-                var node = heap.Pop();
-
-                if (node.Position == end)
-                {
-                    return Trace(node);
-                }
-
-                IdentitySuccessors((JumpNode)node, Nodes, end, heap);
+                return cachedList;
             }
 
+            var path = BuildFullPath(GetJumpList(start, end).ToList());
+            for (var i = 0; i < path.Count; i++)
+            {
+                Cache.Set((path[i], end), path.Skip(i), DateTimeOffset.Now.AddSeconds(10));
+            }
+            return path;
+        }
+
+        internal IEnumerable<(short X, short Y)> GetJumpList((short X, short Y) start, (short X, short Y) end)
+        {
+            var nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Length];
+            if (_mapGrid.IsWalkable(start.X, start.Y) && _mapGrid.IsWalkable(end.X, end.Y))
+            {
+                var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
+                nodes[start.X, start.Y] = startNode;
+                var heap = new MinHeap();
+                heap.Push(startNode);
+
+                while (heap.Count != 0)
+                {
+                    var node = heap.Pop();
+                    node.Closed = true;
+                    if (node.Position == end)
+                    {
+                        return Trace(node);
+                    }
+
+                    IdentifySuccessors((JumpNode)node, nodes, end, heap);
+                }
+            }
             return new (short X, short Y)[0];
         }
 
@@ -74,7 +109,7 @@ namespace NosCore.PathFinder.Pathfinder
             return path.Select(s => s.Position).ToList();
         }
 
-        private void IdentitySuccessors(JumpNode node, JumpNode?[,] Nodes, (short X, short Y) end, MinHeap heap)
+        private void IdentifySuccessors(JumpNode node, JumpNode?[,] nodes, (short X, short Y) end, MinHeap heap)
         {
             foreach (var neighbour in _mapGrid.GetNeighbors(node.Position))
             {
@@ -84,10 +119,10 @@ namespace NosCore.PathFinder.Pathfinder
                     continue;
                 }
 
-                var jumpNode = Nodes[jumpPoint.Value.X, jumpPoint.Value.Y] ??
+                var jumpNode = nodes[jumpPoint.Value.X, jumpPoint.Value.Y] ??
                                new JumpNode((jumpPoint.Value.X, jumpPoint.Value.Y),
                                    _mapGrid[jumpPoint.Value.X, jumpPoint.Value.Y]);
-                Nodes[jumpPoint.Value.X, jumpPoint.Value.Y] = jumpNode;
+                nodes[jumpPoint.Value.X, jumpPoint.Value.Y] = jumpNode;
 
                 if (jumpNode.Closed)
                 {
@@ -101,7 +136,6 @@ namespace NosCore.PathFinder.Pathfinder
                 {
                     continue;
                 }
-
                 jumpNode.G = ng;
                 jumpNode.H ??= _heuristic.GetDistance(jumpPoint.Value, end);
                 jumpNode.F = jumpNode.G + jumpNode.H.Value;
@@ -112,10 +146,6 @@ namespace NosCore.PathFinder.Pathfinder
                     heap.Push(jumpNode);
                     jumpNode.Opened = true;
                 }
-                else
-                {
-                    heap.Push(jumpNode);
-                }
             }
         }
 
@@ -123,8 +153,8 @@ namespace NosCore.PathFinder.Pathfinder
         {
             var x = current.X;
             var y = current.Y;
-            var dx = current.X - proposed.X;
-            var dy = current.Y - proposed.Y;
+            var dx = x - proposed.X;
+            var dy = y - proposed.Y;
 
             if (!_mapGrid.IsWalkable(x, y))
             {

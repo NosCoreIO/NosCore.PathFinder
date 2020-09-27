@@ -38,7 +38,6 @@ namespace NosCore.PathFinder.Tests
             {
                 new GoalBasedPathfinder(_map, new OctileDistanceHeuristic()),
                 new JumpPointSearchPathfinder(_map, new OctileDistanceHeuristic()),
-                new LinearPathfinder(_map, new OctileDistanceHeuristic())
             };
 
             var pathfindersTypes = typeof(IPathfinder).Assembly

@@ -44,7 +44,7 @@ namespace NosCore.PathFinder.Brushfire
             var grid = new Node?[mapGrid.Width, mapGrid.Length];
             grid[user.X, user.Y] = new Node(user, mapGrid[user.X, user.Y])
             {
-                Opened = true
+                Closed = true
             };
             path.Push(grid[user.X, user.Y]!);
             cellGrid[user] = new Node(user, null);
@@ -59,7 +59,7 @@ namespace NosCore.PathFinder.Brushfire
                 grid[cell.Position.X, cell.Position.Y]!.Closed = true;
 
                 // get neigbours of the current Cell if the neighbor has not been inspected yet, or can be reached with
-                var neighbors = mapGrid.GetNeighbors(cell.Position).Select(s => grid[s.X, s.Y] ?? new Node(s, mapGrid[s.X, s.Y])).Where(neighbor => !neighbor.Closed && !neighbor.Opened).ToList();
+                var neighbors = mapGrid.GetNeighbors(cell.Position).Select(s => grid[s.X, s.Y] ?? new Node(s, mapGrid[s.X, s.Y])).Where(neighbor => !neighbor.Closed).ToList();
 
                 for (int i = 0, l = neighbors.Count; i < l; ++i)
                 {
@@ -79,7 +79,7 @@ namespace NosCore.PathFinder.Brushfire
                     }
 
                     path.Push(neighbors[i]!);
-                    neighbors[i]!.Opened = true;
+                    neighbors[i]!.Closed = true;
                 }
             }
             return new BrushFire(user, cellGrid, mapGrid.Width, mapGrid.Length);
