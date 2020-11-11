@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<ApplicationIcon>favicon.ico</ApplicationIcon>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -12,7 +12,7 @@
 		<RepositoryUrl>https://github.com/NosCoreIO/NosCore.PathFinder.git</RepositoryUrl>
 		<PackageIconUrl></PackageIconUrl>
 		<PackageTags>nostale, noscore, nostale private server source, nostale emulator</PackageTags>
-		<Version>0.0.7</Version>
+		<Version>0.0.8</Version>
 		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 		<Description>NosCore's PathFinder</Description>
 		<PackageLicenseExpression></PackageLicenseExpression>
@@ -27,11 +27,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Mapster" Version="6.5.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.9" />
-		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
+		<PackageReference Include="Mapster" Version="6.5.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
 		<PackageReference Include="Serilog" Version="2.10.0" />
-		<PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
