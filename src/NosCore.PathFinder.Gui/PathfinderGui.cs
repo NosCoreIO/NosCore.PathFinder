@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NosCore.PathFinder.Gui.Configuration;
 using NosCore.PathFinder.Gui.Database;
 using NosCore.PathFinder.Gui.I18N;
@@ -28,14 +29,14 @@ namespace NosCore.PathFinder.Gui
         public static async Task Main(string[] args)
         {
             try { Console.Title = Title; } catch (PlatformNotSupportedException) { }
-            ConfiguratorBuilder.InitializeConfiguration(args, new[] { "pathfinder.yml", "logger.yml" }, PathfinderGuiConfiguration);
+            ConfiguratorBuilder.InitializeConfiguration(args, new[] { "pathfinder.yml", "logger.yml" }).Bind(PathfinderGuiConfiguration);
             Shared.I18N.Logger.PrintHeader(ConsoleText);
             var logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
             LogLanguage.Language = PathfinderGuiConfiguration.Language;
             var optionsBuilder = new DbContextOptionsBuilder<NosCoreContext>();
             optionsBuilder.UseNpgsql(PathfinderGuiConfiguration.Database!.ConnectionString);
             DbContextBuilder.Initialize(optionsBuilder.Options);
-            var  mapDao = new Dao<Map, MapDto, short>(logger, DbContextBuilder);
+            var  mapDao = new Dao<Map, MapDto, short>(logger, DbContextBuilder.CreateContext);
 
             while (true)
             {
