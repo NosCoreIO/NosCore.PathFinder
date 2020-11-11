@@ -20,9 +20,9 @@ namespace NosCore.PathFinder.Brushfire
         {
         }
 
-        public int CompareTo(Node other)
+        public int CompareTo(Node? other)
         {
-            return F > other.F ? 1 : F < other.F ? -1 : 0;
+            return F > other?.F ? 1 : F < other?.F ? -1 : 0;
         }
         public bool Closed { get; set; }
 

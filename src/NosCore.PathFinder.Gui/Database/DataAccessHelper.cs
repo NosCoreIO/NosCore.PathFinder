@@ -12,7 +12,7 @@ using Serilog;
 
 namespace NosCore.PathFinder.Gui.Database
 {
-    public class DataAccessHelper : IDbContextBuilder
+    public class DataAccessHelper
     {
         private static readonly ILogger Logger = Shared.I18N.Logger.GetLoggerConfiguration().CreateLogger();
 

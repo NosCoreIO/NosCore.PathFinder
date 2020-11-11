@@ -50,8 +50,8 @@ namespace NosCore.PathFinder.Gui
                 GraphicsMode.Default, title)
         {
             var dbContextBuilder1 = dbContextBuilder;
-            var mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1);
-            var mapNpcDao = new Dao<MapNpc, MapNpcDto, int>(Logger, dbContextBuilder1);
+            var mapMonsterDao = new Dao<MapMonster, MapMonsterDto, int>(Logger, dbContextBuilder1.CreateContext);
+            var mapNpcDao = new Dao<MapNpc, MapNpcDto, int>(Logger, dbContextBuilder1.CreateContext);
             _originalWidth = Width;
             _originalCellSize = Width / map.Width;
             _cellSize = Width / map.Width;
@@ -82,8 +82,8 @@ namespace NosCore.PathFinder.Gui
                 mapNpc.Map = _map;
             }
 
-            Parallel.ForEach(_monsters, monster => monster.StartLife(CancellationToken.None));
-            Parallel.ForEach(_npcs, npc => npc.StartLife(CancellationToken.None));
+            Parallel.ForEach(_monsters, monster => _ = monster.StartLife(CancellationToken.None));
+            Parallel.ForEach(_npcs, npc => _ = npc.StartLife(CancellationToken.None));
 
             var wallpixels = new List<Vector2[]>();
             for (short y = 0; y < _map.Length; y++)

@@ -22,9 +22,9 @@ namespace NosCore.PathFinder.Brushfire
 
         public bool Opened { get; set; }
 
-        public int CompareTo(JumpNode other)
+        public int CompareTo(JumpNode? other)
         {
-            return F > other.F ? 1 : F < other.F ? -1 : 0;
+            return F > other?.F ? 1 : F < other?.F ? -1 : 0;
         }
     }
 }
