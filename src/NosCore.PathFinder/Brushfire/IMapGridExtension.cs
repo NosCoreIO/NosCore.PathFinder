@@ -25,7 +25,7 @@ namespace NosCore.PathFinder.Brushfire
                 var currentX = (short)(cell.X + delta.X);
                 var currentY = (short)(cell.Y + delta.Y);
                 return currentX >= 0 && currentX < grid.Width &&
-                        currentY >= 0 && currentY < grid.Length &&
+                        currentY >= 0 && currentY < grid.Height &&
                         (includeWalls || grid.IsWalkable(currentX, currentY)
                         );
             }).Select(delta => ((short)(cell.X + delta.X), (short)(cell.Y + delta.Y)));
@@ -34,14 +34,14 @@ namespace NosCore.PathFinder.Brushfire
         public static BrushFire LoadBrushFire(this IMapGrid mapGrid, (short X, short Y) user, IHeuristic heuristic, short maxDistance = 22)
         {
             if (user.X < 0 || user.X >= mapGrid.Width ||
-                user.Y < 0 || user.Y >= mapGrid.Length)
+                user.Y < 0 || user.Y >= mapGrid.Height)
             {
-                return new BrushFire(user, new Dictionary<(short X, short Y), Node?>(), mapGrid.Width, mapGrid.Length);
+                return new BrushFire(user, new Dictionary<(short X, short Y), Node?>(), mapGrid.Width, mapGrid.Height);
             }
 
             var path = new MinHeap();
             var cellGrid = new Dictionary<(short X, short Y), Node?>();
-            var grid = new Node?[mapGrid.Width, mapGrid.Length];
+            var grid = new Node?[mapGrid.Width, mapGrid.Height];
             grid[user.X, user.Y] = new Node(user, mapGrid[user.X, user.Y])
             {
                 Closed = true
@@ -82,7 +82,7 @@ namespace NosCore.PathFinder.Brushfire
                     neighbors[i]!.Closed = true;
                 }
             }
-            return new BrushFire(user, cellGrid, mapGrid.Width, mapGrid.Length);
+            return new BrushFire(user, cellGrid, mapGrid.Width, mapGrid.Height);
         }
 
     }

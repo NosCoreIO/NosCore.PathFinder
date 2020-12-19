@@ -35,14 +35,14 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_GoalBasedPathfinder()
         {
-            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Length * TestHelper.Scale);
+            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             (short X, short Y) target = (15, 16);
             var listPixel = new List<Color>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, target, _characterPosition);
             using var graphics = Graphics.FromImage(bitmap);
 
 
-            for (short y = 0; y < _map.Length; y++)
+            for (short y = 0; y < _map.Height; y++)
             {
                 for (short x = 0; x < _map.Width; x++)
                 {
