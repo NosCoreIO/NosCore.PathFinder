@@ -49,7 +49,7 @@ namespace NosCore.PathFinder.Gui
                 }
                 var map = await mapDao.FirstOrDefaultAsync(m => m.MapId == askMapId).ConfigureAwait(false);
 
-                if ((!(map?.Width > 0)) || (map.Length <= 0))
+                if ((!(map?.Width > 0)) || (map.Height <= 0))
                 {
                     continue;
                 }

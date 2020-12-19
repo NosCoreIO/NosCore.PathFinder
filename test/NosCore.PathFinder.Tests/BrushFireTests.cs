@@ -23,13 +23,13 @@ namespace NosCore.PathFinder.Tests
         {
             (short X, short Y) characterPosition = (6, 10);
             var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
-            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Length * TestHelper.Scale);
+            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             var listPixel = new List<Color>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, (0, 0), characterPosition);
             using var graphics = Graphics.FromImage(bitmap);
 
 
-            for (short y = 0; y < _map.Length; y++)
+            for (short y = 0; y < _map.Height; y++)
             {
                 for (short x = 0; x < _map.Width; x++)
                 {

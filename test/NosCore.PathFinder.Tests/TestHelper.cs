@@ -71,7 +71,7 @@ namespace NosCore.PathFinder.Tests
         public static void DrawMap(TestMap map, int scale, List<Color> listPixel, Bitmap bitmap, (short X, short Y) monster, (short X, short Y) character)
         {
             using var graphics = Graphics.FromImage(bitmap);
-            for (short y = 0; y < map.Length; y++)
+            for (short y = 0; y < map.Height; y++)
             {
                 for (short x = 0; x < map.Width; x++)
                 {
