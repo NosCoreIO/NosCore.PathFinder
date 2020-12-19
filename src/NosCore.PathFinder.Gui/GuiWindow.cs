@@ -46,7 +46,7 @@ namespace NosCore.PathFinder.Gui
         private Dictionary<Color, Vector2[]>? _brushFirePixels;
 
         public GuiWindow(MapDto map, int width, int height, string title, DataAccessHelper dbContextBuilder)
-            : base(width, (height < width / map.Width * map.Length) ? width / map.Width * map.Length : height,
+            : base(width, (height < width / map.Width * map.Height) ? width / map.Width * map.Height : height,
                 GraphicsMode.Default, title)
         {
             var dbContextBuilder1 = dbContextBuilder;
@@ -86,7 +86,7 @@ namespace NosCore.PathFinder.Gui
             Parallel.ForEach(_npcs, npc => _ = npc.StartLife(CancellationToken.None));
 
             var wallpixels = new List<Vector2[]>();
-            for (short y = 0; y < _map.Length; y++)
+            for (short y = 0; y < _map.Height; y++)
             {
                 for (short x = 0; x < _map.Width; x++)
                 {

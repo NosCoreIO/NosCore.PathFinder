@@ -38,7 +38,7 @@ namespace NosCore.PathFinder.Gui.Dtos
             }
         }
 
-        public short Length
+        public short Height
         {
             get
             {
@@ -58,7 +58,7 @@ namespace NosCore.PathFinder.Gui.Dtos
 
         public bool IsWalkable(short mapX, short mapY)
         {
-            if ((mapX >= Width) || (mapX < 0) || (mapY >= Length) || (mapY < 0))
+            if ((mapX >= Width) || (mapX < 0) || (mapY >= Height) || (mapY < 0))
             {
                 return false;
             }

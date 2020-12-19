@@ -74,7 +74,7 @@ namespace NosCore.PathFinder.Pathfinder
 
         internal IEnumerable<(short X, short Y)> GetJumpList((short X, short Y) start, (short X, short Y) end)
         {
-            var nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Length];
+            var nodes = new JumpNode?[_mapGrid.Width, _mapGrid.Height];
             if (_mapGrid.IsWalkable(start.X, start.Y) && _mapGrid.IsWalkable(end.X, end.Y))
             {
                 var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
