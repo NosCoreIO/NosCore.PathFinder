@@ -83,5 +83,16 @@ namespace NosCore.PathFinder.Tests
 
             TestHelper.VerifyFile("goal-based-pathfinder.png", bitmap, listPixel, "Goal Based Pathfinder");
         }
+
+
+        [TestMethod]
+        public void Test_GoalBasedPathfinder_OutOfDistance_ShouldNotReturnPath()
+        {
+            (short X, short Y) characterPosition = (6, 10);
+            var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic(), 2);
+            var goalPathfinder = new GoalBasedPathfinder(_map, new OctileDistanceHeuristic(), brushFire);
+            var path = goalPathfinder.FindPath((2, 2), characterPosition);
+            Assert.AreEqual(0, path.Count());
+        }
     }
 }
