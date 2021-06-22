@@ -25,14 +25,25 @@ namespace NosCore.PathFinder.Pathfinder
             _heuristic = heuristic;
         }
 
+        public GoalBasedPathfinder(IMapGrid mapGrid, IHeuristic heuristic, BrushFire brushfire) : this(mapGrid, heuristic)
+        {
+            CacheBrushFire(brushfire, brushfire.Origin);
+        }
+
+
         private BrushFire CacheBrushFire(BrushFire brushFire, (short X, short Y) start)
         {
             Node? GetParent((short X, short Y) currentnode)
             {
-                var neighbor = _mapGrid.GetNeighbors(currentnode).Select(s => new Node((s.X, s.Y), brushFire.Grid[(s.X, s.Y)]?.Value ?? 0)).OrderBy(s => s.Value).FirstOrDefault();
+                var neighbor = _mapGrid.GetNeighbors(currentnode).Select(s => new Node((s.X, s.Y), brushFire.Grid.ContainsKey((s.X, s.Y)) ? brushFire.Grid[(s.X, s.Y)]?.Value ?? 0 : 0)).OrderBy(s => s.Value).FirstOrDefault();
                 if (!(neighbor is { } neighborCell))
                 {
                     return null;
+                }
+
+                if (!brushFire.Grid.ContainsKey((neighborCell.Position.X, neighborCell.Position.Y)))
+                {
+                    brushFire.Grid.Add((neighborCell.Position.X, neighborCell.Position.Y), new Node(neighborCell.Position, null));
                 }
 
                 brushFire.Grid[(neighborCell.Position.X, neighborCell.Position.Y)] ??= new Node(neighborCell.Position, null);
@@ -59,10 +70,10 @@ namespace NosCore.PathFinder.Pathfinder
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
-            List<(short X, short Y)> list = new List<(short X, short Y)>();
+            List<(short X, short Y)> list = new();
             BrushFirecache.TryGetValue(end, out BrushFire? brushFireOut);
 
-            if (!_mapGrid.IsWalkable(start.X, start.Y) || !_mapGrid.IsWalkable(end.X, end.Y))
+            if (!_mapGrid.IsWalkable(start.X, start.Y) || !_mapGrid.IsWalkable(end.X, end.Y) || (brushFireOut != null && !brushFireOut.Value.Grid.ContainsKey((start.X, start.Y))))
             {
                 return list;
             }
