@@ -19,7 +19,7 @@
     <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
     <PackageReference Include="NosCore.Dao" Version="1.7.4" />
     <PackageReference Include="NosCore.Shared" Version="1.14.4" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.10" />
     <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.32" />
   </ItemGroup>
 
