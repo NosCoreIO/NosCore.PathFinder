@@ -39,21 +39,21 @@ namespace NosCore.PathFinder.Brushfire
                 return new BrushFire(user, new Dictionary<(short X, short Y), Node?>(), mapGrid.Width, mapGrid.Height);
             }
 
-            var path = new MinHeap();
+            var path = new PriorityQueue<Node, double>();
             var cellGrid = new Dictionary<(short X, short Y), Node?>();
             var grid = new Node?[mapGrid.Width, mapGrid.Height];
             grid[user.X, user.Y] = new Node(user, mapGrid[user.X, user.Y])
             {
                 Closed = true
             };
-            path.Push(grid[user.X, user.Y]!);
+            path.Enqueue(grid[user.X, user.Y]!, 0);
             cellGrid[user] = new Node(user, null);
 
             // while the open list is not empty
             while (path.Count > 0)
             {
                 // pop the position of Cell which has the minimum `f` value.
-                var cell = path.Pop();
+                var cell = path.Dequeue();
                 cellGrid[cell.Position] ??= new Node(cell.Position, mapGrid[cell.Position.X, cell.Position.Y]);
                 grid[cell.Position.X, cell.Position.Y] ??= new Node(cell.Position, mapGrid[cell.Position.X, cell.Position.Y]);
                 grid[cell.Position.X, cell.Position.Y]!.Closed = true;
@@ -78,7 +78,7 @@ namespace NosCore.PathFinder.Brushfire
                         grid[neighbors[i]!.Position.X, neighbors[i]!.Position.Y] = neighbors[i];
                     }
 
-                    path.Push(neighbors[i]!);
+                    path.Enqueue(neighbors[i]!, neighbors[i]!.F);
                     neighbors[i]!.Closed = true;
                 }
             }

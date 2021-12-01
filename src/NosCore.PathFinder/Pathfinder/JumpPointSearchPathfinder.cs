@@ -79,12 +79,12 @@ namespace NosCore.PathFinder.Pathfinder
             {
                 var startNode = new JumpNode(start, _mapGrid[start.X, start.Y]) { F = 0, G = 0, Opened = true };
                 nodes[start.X, start.Y] = startNode;
-                var heap = new MinHeap();
-                heap.Push(startNode);
+                var heap = new PriorityQueue<JumpNode, double>();
+                heap.Enqueue(startNode, 0);
 
                 while (heap.Count != 0)
                 {
-                    var node = heap.Pop();
+                    var node = heap.Dequeue();
                     node.Closed = true;
                     if (node.Position == end)
                     {
@@ -109,7 +109,7 @@ namespace NosCore.PathFinder.Pathfinder
             return path.Select(s => s.Position).ToList();
         }
 
-        private void IdentifySuccessors(JumpNode node, JumpNode?[,] nodes, (short X, short Y) end, MinHeap heap)
+        private void IdentifySuccessors(JumpNode node, JumpNode?[,] nodes, (short X, short Y) end, PriorityQueue<JumpNode, double> heap)
         {
             foreach (var neighbour in _mapGrid.GetNeighbors(node.Position))
             {
@@ -143,7 +143,7 @@ namespace NosCore.PathFinder.Pathfinder
 
                 if (!jumpNode.Opened)
                 {
-                    heap.Push(jumpNode);
+                    heap.Enqueue(jumpNode, jumpNode.F);
                     jumpNode.Opened = true;
                 }
             }

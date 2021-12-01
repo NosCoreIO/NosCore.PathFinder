@@ -8,22 +8,14 @@ using System;
 
 namespace NosCore.PathFinder.Brushfire
 {
-    public class Node : IComparable<Node>
+    public class Node
     {
         public Node((short X, short Y) position, double? value)
         {
             Value = value;
             Position = position;
         }
-
-        public Node()
-        {
-        }
-
-        public int CompareTo(Node? other)
-        {
-            return F > other?.F ? 1 : F < other?.F ? -1 : 0;
-        }
+        
         public bool Closed { get; set; }
 
         public Node? Parent { get; set; }
