@@ -8,12 +8,10 @@ using System;
 
 namespace NosCore.PathFinder.Brushfire
 {
-    public class JumpNode : Node, IComparable<JumpNode>
+    public class JumpNode : Node
     {
-        public JumpNode((short X, short Y) position, double? value)
+        public JumpNode((short X, short Y) position, double? value) : base(position, value)
         {
-            Value = value;
-            Position = position;
         }
 
         public double G { get; set; }
@@ -21,10 +19,5 @@ namespace NosCore.PathFinder.Brushfire
         public double? H { get; set; }
 
         public bool Opened { get; set; }
-
-        public int CompareTo(JumpNode? other)
-        {
-            return F > other?.F ? 1 : F < other?.F ? -1 : 0;
-        }
     }
 }
