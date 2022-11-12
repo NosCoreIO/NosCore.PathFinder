@@ -59,9 +59,9 @@ namespace NosCore.PathFinder.Pathfinder
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
-            if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)> cachedList))
+            if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)>? cachedList))
             {
-                return cachedList;
+                return cachedList ?? Array.Empty<(short X, short Y)>();
             }
 
             var path = BuildFullPath(GetJumpList(start, end).ToList());
@@ -94,7 +94,7 @@ namespace NosCore.PathFinder.Pathfinder
                     IdentifySuccessors((JumpNode)node, nodes, end, heap);
                 }
             }
-            return new (short X, short Y)[0];
+            return Array.Empty<(short X, short Y)>();
         }
 
         private List<(short X, short Y)> Trace(Node node)
