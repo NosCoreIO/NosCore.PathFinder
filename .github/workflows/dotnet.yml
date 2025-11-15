@@ -30,6 +30,8 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libgdiplus
         sudo ldconfig
+        # Create symbolic link for .NET runtime to find the library
+        sudo ln -sf /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 
     - name: Run Unit Tests
       run: |
