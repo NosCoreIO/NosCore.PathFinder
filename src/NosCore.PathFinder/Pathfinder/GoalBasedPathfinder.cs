@@ -13,18 +13,37 @@ using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Pathfinder
 {
+    /// <summary>
+    /// Goal-based pathfinder implementation using brushfire algorithm with caching.
+    /// This pathfinder pre-computes paths from goals and caches them for performance.
+    /// </summary>
     public class GoalBasedPathfinder : IPathfinder
     {
         private readonly IMapGrid _mapGrid;
+
+        /// <summary>
+        /// Static memory cache for storing pre-computed brushfire data.
+        /// </summary>
         public static readonly MemoryCache BrushFirecache = new MemoryCache(new MemoryCacheOptions());
         private readonly IHeuristic _heuristic;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GoalBasedPathfinder"/> class.
+        /// </summary>
+        /// <param name="mapGrid">The map grid to use for pathfinding.</param>
+        /// <param name="heuristic">The heuristic to use for distance calculations.</param>
         public GoalBasedPathfinder(IMapGrid mapGrid, IHeuristic heuristic)
         {
             _mapGrid = mapGrid;
             _heuristic = heuristic;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GoalBasedPathfinder"/> class with a pre-computed brushfire.
+        /// </summary>
+        /// <param name="mapGrid">The map grid to use for pathfinding.</param>
+        /// <param name="heuristic">The heuristic to use for distance calculations.</param>
+        /// <param name="brushfire">Pre-computed brushfire data to cache.</param>
         public GoalBasedPathfinder(IMapGrid mapGrid, IHeuristic heuristic, BrushFire brushfire) : this(mapGrid, heuristic)
         {
             CacheBrushFire(brushfire, brushfire.Origin);
@@ -68,6 +87,7 @@ namespace NosCore.PathFinder.Pathfinder
             return brushFire;
         }
 
+        /// <inheritdoc />
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
             List<(short X, short Y)> list = new();

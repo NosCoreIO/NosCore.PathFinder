@@ -13,12 +13,25 @@ using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Pathfinder
 {
+    /// <summary>
+    /// Jump Point Search (JPS) pathfinder implementation with caching.
+    /// JPS is an optimization of A* that skips unnecessary nodes in uniform-cost grids.
+    /// </summary>
     public class JumpPointSearchPathfinder : IPathfinder
     {
         private readonly IMapGrid _mapGrid;
+
+        /// <summary>
+        /// Static memory cache for storing computed paths.
+        /// </summary>
         public static readonly MemoryCache Cache = new MemoryCache(new MemoryCacheOptions());
         private readonly IHeuristic _heuristic;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JumpPointSearchPathfinder"/> class.
+        /// </summary>
+        /// <param name="mapGrid">The map grid to use for pathfinding.</param>
+        /// <param name="heuristic">The heuristic to use for distance calculations.</param>
         public JumpPointSearchPathfinder(IMapGrid mapGrid, IHeuristic heuristic)
         {
             _mapGrid = mapGrid;
@@ -57,6 +70,7 @@ namespace NosCore.PathFinder.Pathfinder
             return path;
         }
 
+        /// <inheritdoc />
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
             if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)>? cachedList))
@@ -149,6 +163,13 @@ namespace NosCore.PathFinder.Pathfinder
             }
         }
 
+        /// <summary>
+        /// Recursively searches for jump points in the specified direction.
+        /// </summary>
+        /// <param name="current">The current position to evaluate.</param>
+        /// <param name="proposed">The previous position (determines search direction).</param>
+        /// <param name="end">The destination position.</param>
+        /// <returns>The jump point coordinates if found; otherwise, null.</returns>
         public (short X, short Y)? Jump((short X, short Y) current, (short X, short Y) proposed, (short X, short Y) end)
         {
             var x = current.X;
