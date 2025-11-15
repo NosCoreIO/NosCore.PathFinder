@@ -10,6 +10,9 @@ using NosCore.PathFinder.Interfaces;
 
 namespace NosCore.PathFinder.Brushfire
 {
+    /// <summary>
+    /// Extension methods for IMapGrid interface providing neighbor and brushfire functionality.
+    /// </summary>
     public static class IMapGridExtension
     {
         private static readonly List<(short X, short Y)> Neighbours = new List<(short, short)> {
@@ -18,6 +21,13 @@ namespace NosCore.PathFinder.Brushfire
             (-1, 1),  (0, 1),  (1, 1)
         };
 
+        /// <summary>
+        /// Gets the neighboring cells of a given cell in the grid.
+        /// </summary>
+        /// <param name="grid">The map grid.</param>
+        /// <param name="cell">The cell to get neighbors for.</param>
+        /// <param name="includeWalls">If true, includes non-walkable cells; otherwise, only returns walkable neighbors.</param>
+        /// <returns>An enumerable sequence of neighboring cell positions.</returns>
         public static IEnumerable<(short X, short Y)> GetNeighbors(this IMapGrid grid, (short X, short Y) cell, bool includeWalls = false)
         {
             return Neighbours.Where(delta =>
@@ -31,6 +41,14 @@ namespace NosCore.PathFinder.Brushfire
             }).Select(delta => ((short)(cell.X + delta.X), (short)(cell.Y + delta.Y)));
         }
 
+        /// <summary>
+        /// Computes a brushfire distance map from a given origin point.
+        /// </summary>
+        /// <param name="mapGrid">The map grid to compute the brushfire on.</param>
+        /// <param name="user">The origin point for the brushfire.</param>
+        /// <param name="heuristic">The heuristic to use for distance calculations.</param>
+        /// <param name="maxDistance">The maximum distance to compute (default is 22).</param>
+        /// <returns>A BrushFire structure containing pre-computed distance information.</returns>
         public static BrushFire LoadBrushFire(this IMapGrid mapGrid, (short X, short Y) user, IHeuristic heuristic, short maxDistance = 22)
         {
             if (user.X < 0 || user.X >= mapGrid.Width ||
