@@ -44,7 +44,7 @@ namespace NosCore.PathFinder.Tests
                 .GetTypes()
                 .Where(mytype => mytype.GetInterfaces().Contains(typeof(IPathfinder))).ToList();
 
-            Assert.IsTrue(!pathfindersTypes.Except(pathfinders.Select(s => s.GetType())).Any());
+            Assert.AreEqual(0, pathfindersTypes.Except(pathfinders.Select(s => s.GetType())).Count());
 
             foreach (var pathfinder in pathfinders)
             {
