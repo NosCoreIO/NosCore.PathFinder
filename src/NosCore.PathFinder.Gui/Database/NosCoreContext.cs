@@ -11,7 +11,7 @@ namespace NosCore.PathFinder.Gui.Database
 {
     public class NosCoreContext : DbContext
     {
-        public NosCoreContext(DbContextOptions? options) : base(options)
+        public NosCoreContext(DbContextOptions options) : base(options)
         {
         }
 

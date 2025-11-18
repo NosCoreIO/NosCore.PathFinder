@@ -1,0 +1,6 @@
+root = false
+
+[*.cs]
+# Suppress CA1416: Platform compatibility warnings for System.Drawing
+# We explicitly enable Unix support via RuntimeHostConfigurationOption
+dotnet_diagnostic.CA1416.severity = none
