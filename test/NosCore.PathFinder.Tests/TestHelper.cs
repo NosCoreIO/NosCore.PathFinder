@@ -39,11 +39,23 @@ namespace NosCore.PathFinder.Tests
 
 
         public static int Scale = 50;
-        public static StringFormat StringFormat = new StringFormat
+
+        private static StringFormat? _stringFormat;
+        public static StringFormat StringFormat
         {
-            LineAlignment = StringAlignment.Center,
-            Alignment = StringAlignment.Center
-        };
+            get
+            {
+                if (_stringFormat == null)
+                {
+                    _stringFormat = new StringFormat
+                    {
+                        LineAlignment = StringAlignment.Center,
+                        Alignment = StringAlignment.Center
+                    };
+                }
+                return _stringFormat;
+            }
+        }
 
         public static TestMap SimpleMap = new TestMap(new[]
         {
