@@ -21,13 +21,6 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_BrushFire()
         {
-            // System.Drawing.Common only supports Windows in .NET 10+
-            if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-            {
-                Assert.Inconclusive("System.Drawing visualization tests only run on Windows (.NET 10+)");
-                return;
-            }
-
             (short X, short Y) characterPosition = (6, 10);
             var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
             var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
