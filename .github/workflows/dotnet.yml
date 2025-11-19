@@ -35,7 +35,7 @@ jobs:
 
     - name: Run Unit Tests
       env:
-        DOTNET_SYSTEM_DRAWING_ENABLEUNIXSUPPORT: 1
+        DOTNET_System_Drawing_EnableUnixSupport: true
       run: |
         dotnet restore
         dotnet build
