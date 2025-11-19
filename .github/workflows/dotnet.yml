@@ -34,6 +34,8 @@ jobs:
         sudo ln -sf /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 
     - name: Run Unit Tests
+      env:
+        DOTNET_SYSTEM_DRAWING_ENABLEUNIXSUPPORT: 1
       run: |
         dotnet restore
         dotnet build

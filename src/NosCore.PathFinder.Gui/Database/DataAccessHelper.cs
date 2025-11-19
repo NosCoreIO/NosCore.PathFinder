@@ -23,6 +23,10 @@ namespace NosCore.PathFinder.Gui.Database
         /// </summary>
         public DbContext CreateContext()
         {
+            if (_option == null)
+            {
+                throw new InvalidOperationException("Database options must be initialized before creating a context. Call Initialize() first.");
+            }
             return new NosCoreContext(_option);
         }
 
