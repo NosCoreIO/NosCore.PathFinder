@@ -31,6 +31,13 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_JumpPointSearchPathfinder()
         {
+            // System.Drawing.Common only supports Windows in .NET 10+
+            if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                Assert.Inconclusive("System.Drawing visualization tests only run on Windows (.NET 10+)");
+                return;
+            }
+
             var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             (short X, short Y) target = (15, 16);
             var listPixel = new List<Color>();

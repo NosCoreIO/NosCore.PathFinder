@@ -34,11 +34,10 @@ jobs:
         sudo ln -sf /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 
     - name: Run Unit Tests
-      env:
-        DOTNET_System_Drawing_EnableUnixSupport: true
       run: |
         dotnet restore
         dotnet build
+        export DOTNET_SYSTEM_DRAWING_ENABLEUNIXSUPPORT=1
         dotnet test test/NosCore.PathFinder.Tests -v m
         
     - name: Build Artifact
