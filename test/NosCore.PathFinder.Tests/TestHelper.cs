@@ -4,8 +4,10 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -100,6 +102,32 @@ namespace NosCore.PathFinder.Tests
                     listPixel.Add(color);
                 }
             }
+        }
+
+        public static void DrawArrow(Graphics graphics, int cellX, int cellY, float dirX, float dirY, int scale, Color color)
+        {
+            var centerX = cellX * scale + scale / 2f;
+            var centerY = cellY * scale + scale / 2f;
+
+            var arrowLength = scale * 0.35f;
+            var headLength = scale * 0.15f;
+            var headWidth = scale * 0.12f;
+
+            var endX = centerX + dirX * arrowLength;
+            var endY = centerY + dirY * arrowLength;
+
+            using var pen = new Pen(color, 2f);
+            graphics.DrawLine(pen, centerX, centerY, endX, endY);
+
+            var angle = (float)Math.Atan2(dirY, dirX);
+            var head1X = endX - headLength * (float)Math.Cos(angle - 0.5f) ;
+            var head1Y = endY - headLength * (float)Math.Sin(angle - 0.5f);
+            var head2X = endX - headLength * (float)Math.Cos(angle + 0.5f);
+            var head2Y = endY - headLength * (float)Math.Sin(angle + 0.5f);
+
+            using var brush = new SolidBrush(color);
+            var headPoints = new PointF[] { new(endX, endY), new(head1X, head1Y), new(head2X, head2Y) };
+            graphics.FillPolygon(brush, headPoints);
         }
     }
 }
