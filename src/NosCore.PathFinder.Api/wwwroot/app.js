@@ -271,45 +271,58 @@ function updateEntities(deltaTime) {
                 entity.y = entity.homeY;
                 returnFlowFields.delete(entity.id);
                 entity.needsReturnPath = false;
+                entity.stuckFrames = 0;
                 continue;
-            }
-
-            if (!entity.needsReturnPath && dist > 0.5) {
-                entity.needsReturnPath = true;
-                requestReturnPath(entity);
-            }
-
-            const returnField = returnFlowFields.get(entity.id);
-            if (returnField) {
-                const returnVector = returnField.get(key);
-                if (returnVector) {
-                    const newX = entity.x + returnVector.dx * RETURN_SPEED * deltaTime;
-                    const newY = entity.y + returnVector.dy * RETURN_SPEED * deltaTime;
-                    if (isWalkable(newX, newY)) {
-                        entity.x = newX;
-                        entity.y = newY;
-                    } else if (isWalkable(newX, entity.y)) {
-                        entity.x = newX;
-                    } else if (isWalkable(entity.x, newY)) {
-                        entity.y = newY;
-                    }
-                    continue;
-                }
             }
 
             const nx = dx / dist;
             const ny = dy / dist;
             const move = Math.min(dist, RETURN_SPEED * deltaTime);
-            const newX = entity.x + nx * move;
-            const newY = entity.y + ny * move;
+            const directX = entity.x + nx * move;
+            const directY = entity.y + ny * move;
 
-            if (isWalkable(newX, newY)) {
-                entity.x = newX;
-                entity.y = newY;
-            } else if (isWalkable(newX, entity.y)) {
-                entity.x = newX;
-            } else if (isWalkable(entity.x, newY)) {
-                entity.y = newY;
+            let moved = false;
+            if (isWalkable(directX, directY)) {
+                entity.x = directX;
+                entity.y = directY;
+                moved = true;
+                entity.stuckFrames = 0;
+                returnFlowFields.delete(entity.id);
+                entity.needsReturnPath = false;
+            } else if (isWalkable(directX, entity.y)) {
+                entity.x = directX;
+                moved = true;
+                entity.stuckFrames = 0;
+            } else if (isWalkable(entity.x, directY)) {
+                entity.y = directY;
+                moved = true;
+                entity.stuckFrames = 0;
+            }
+
+            if (!moved) {
+                entity.stuckFrames = (entity.stuckFrames || 0) + 1;
+
+                if (entity.stuckFrames > 5 && !entity.needsReturnPath) {
+                    entity.needsReturnPath = true;
+                    requestReturnPath(entity);
+                }
+
+                const returnField = returnFlowFields.get(entity.id);
+                if (returnField) {
+                    const returnVector = returnField.get(key);
+                    if (returnVector) {
+                        const pathX = entity.x + returnVector.dx * RETURN_SPEED * deltaTime;
+                        const pathY = entity.y + returnVector.dy * RETURN_SPEED * deltaTime;
+                        if (isWalkable(pathX, pathY)) {
+                            entity.x = pathX;
+                            entity.y = pathY;
+                        } else if (isWalkable(pathX, entity.y)) {
+                            entity.x = pathX;
+                        } else if (isWalkable(entity.x, pathY)) {
+                            entity.y = pathY;
+                        }
+                    }
+                }
             }
         }
     }

@@ -266,9 +266,6 @@ class HeuristicProvider
     private readonly Dictionary<string, IHeuristic> _heuristics = new(StringComparer.OrdinalIgnoreCase)
     {
         ["octile"] = new OctileDistanceHeuristic(),
-        ["manhattan"] = new ManhattanDistanceHeuristic(),
-        ["euclidean"] = new EuclideanDistanceHeuristic(),
-        ["chebyshev"] = new ChebyshevDistanceHeuristic()
     };
 
     public IHeuristic Get(string? name) =>
