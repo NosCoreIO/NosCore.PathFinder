@@ -60,7 +60,10 @@ namespace NosCore.PathFinder.Tests
                     }
                 }
 
-                _font ??= SystemFonts.Collection.Families.FirstOrDefault()?.CreateFont(16);
+                if (_font == null && SystemFonts.Collection.Families.Any())
+                {
+                    _font = SystemFonts.Collection.Families.First().CreateFont(16);
+                }
             }
             return _font;
         }
