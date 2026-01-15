@@ -22,6 +22,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libgdiplus
+        sudo ln -sf /usr/lib/libgdiplus.so /usr/lib/gdiplus.dll
 
     - name: Check Tag
       id: check-tag
