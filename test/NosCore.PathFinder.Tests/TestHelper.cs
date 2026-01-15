@@ -44,12 +44,23 @@ namespace NosCore.PathFinder.Tests
         public static int Scale = 50;
 
         private static Font? _font;
-        public static Font GetFont()
+        private static bool _fontLoaded;
+        public static Font? GetFont()
         {
-            if (_font == null)
+            if (!_fontLoaded)
             {
-                var fontCollection = new FontCollection();
-                _font = SystemFonts.CreateFont("Arial", 16);
+                _fontLoaded = true;
+                var fontNames = new[] { "Arial", "DejaVu Sans", "Liberation Sans", "Noto Sans", "FreeSans" };
+                foreach (var fontName in fontNames)
+                {
+                    if (SystemFonts.TryGet(fontName, out var family))
+                    {
+                        _font = family.CreateFont(16);
+                        break;
+                    }
+                }
+
+                _font ??= SystemFonts.Collection.Families.FirstOrDefault()?.CreateFont(16);
             }
             return _font;
         }
@@ -106,7 +117,7 @@ namespace NosCore.PathFinder.Tests
                             color = Color.DarkRed;
                         }
                         ctx.Fill(color, rect);
-                        if (text != null)
+                        if (text != null && font != null)
                         {
                             var textOptions = new RichTextOptions(font)
                             {
