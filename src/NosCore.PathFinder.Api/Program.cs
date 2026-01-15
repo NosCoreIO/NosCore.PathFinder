@@ -5,19 +5,35 @@
 // -----------------------------------
 
 using System.Diagnostics;
+using System.Globalization;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using NosCore.PathFinder.Api;
 using NosCore.PathFinder.Api.Database;
+using NosCore.PathFinder.Api.Resource;
 using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Heuristic;
 using NosCore.PathFinder.Interfaces;
+using NosCore.Shared.I18N;
+using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Logger = NosCore.Shared.I18N.Logger;
+
+var pathfinderConfig = LoadPathfinderConfig();
+Logger.PrintHeader("PATHFINDER API - NosCoreIO");
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
+
+builder.Services.AddLocalization();
+builder.Services.AddI18NLogs();
+builder.Services.AddTransient(typeof(ILogLanguageLocalizer<LogLanguageKey>),
+    x => new LogLanguageLocalizer<LogLanguageKey, LocalizedResources>(
+        x.GetRequiredService<IStringLocalizer<LocalizedResources>>()));
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -26,22 +42,32 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddSingleton<HeuristicProvider>();
 builder.Services.AddSingleton<PerformanceTracker>();
 
-var connectionString = LoadConnectionString(builder.Configuration);
+var connectionString = LoadConnectionString(builder.Configuration, pathfinderConfig);
 if (!string.IsNullOrEmpty(connectionString))
 {
     builder.Services.AddDbContext<PathFinderContext>(options =>
         options.UseNpgsql(connectionString));
     builder.Services.AddSingleton<MapStore>(sp =>
         new MapStore(sp, sp.GetRequiredService<ILogger<MapStore>>()));
-    Console.WriteLine("Database configured - will load maps from PostgreSQL");
 }
 else
 {
     builder.Services.AddSingleton<MapStore>();
-    Console.WriteLine("No database configured - using sample maps only");
 }
 
 var app = builder.Build();
+
+var logLanguage = app.Services.GetRequiredService<ILogLanguageLocalizer<LogLanguageKey>>();
+Log.Information(logLanguage[LogLanguageKey.LANGUAGE_LOADED], CultureInfo.CurrentCulture.Name);
+
+if (!string.IsNullOrEmpty(connectionString))
+{
+    Log.Information(logLanguage[LogLanguageKey.DATABASE_CONFIGURED]);
+}
+else
+{
+    Log.Information(logLanguage[LogLanguageKey.NO_DATABASE_CONFIGURED]);
+}
 
 var mapStore = app.Services.GetRequiredService<MapStore>();
 await mapStore.LoadFromDatabaseAsync();
@@ -201,28 +227,40 @@ app.Map("/ws", async (HttpContext context, MapStore store, HeuristicProvider heu
 
 app.Run();
 
-static string? LoadConnectionString(IConfiguration configuration)
+static PathfinderConfig? LoadPathfinderConfig()
 {
-    var baseDir = AppContext.BaseDirectory;
-    var currentDir = Directory.GetCurrentDirectory();
-
-    var yamlPaths = new[]
-    {
-        Path.Combine(baseDir, "..", "..", "configuration", "pathfinder.yml"),
-        Path.Combine(baseDir, "configuration", "pathfinder.yml"),
-        Path.Combine(currentDir, "configuration", "pathfinder.yml"),
-        Path.Combine(currentDir, "..", "..", "configuration", "pathfinder.yml"),
-        @"C:\dev\NosCore.PathFinder\configuration\pathfinder.yml"
-    };
-
-    Console.WriteLine($"Base directory: {baseDir}");
-    Console.WriteLine($"Current directory: {currentDir}");
-    Console.WriteLine("Searching for pathfinder.yml...");
+    var yamlPaths = GetConfigPaths();
 
     foreach (var yamlPath in yamlPaths)
     {
         var fullPath = Path.GetFullPath(yamlPath);
-        Console.WriteLine($"  Checking: {fullPath}");
+        if (File.Exists(fullPath))
+        {
+            try
+            {
+                var yaml = File.ReadAllText(fullPath);
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                    .IgnoreUnmatchedProperties()
+                    .Build();
+                return deserializer.Deserialize<PathfinderConfig>(yaml);
+            }
+            catch
+            {
+            }
+        }
+    }
+
+    return null;
+}
+
+static string? LoadConnectionString(IConfiguration configuration, PathfinderConfig? pathfinderConfig)
+{
+    var yamlPaths = GetConfigPaths();
+
+    foreach (var yamlPath in yamlPaths)
+    {
+        var fullPath = Path.GetFullPath(yamlPath);
         if (File.Exists(fullPath))
         {
             try
@@ -237,13 +275,11 @@ static string? LoadConnectionString(IConfiguration configuration)
                 {
                     var db = config.Database;
                     var connStr = $"Host={db.Host};Port={db.Port};Database={db.Database};Username={db.Username};Password={db.Password}";
-                    Console.WriteLine($"Loaded database config from: {fullPath}");
                     return connStr;
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"Failed to parse {fullPath}: {ex.Message}");
             }
         }
     }
@@ -251,12 +287,25 @@ static string? LoadConnectionString(IConfiguration configuration)
     var jsonConnStr = configuration.GetConnectionString("NosCore");
     if (!string.IsNullOrEmpty(jsonConnStr))
     {
-        Console.WriteLine("Using connection string from appsettings.json");
         return jsonConnStr;
     }
 
-    Console.WriteLine("No database configuration found");
     return null;
+}
+
+static string[] GetConfigPaths()
+{
+    var baseDir = AppContext.BaseDirectory;
+    var currentDir = Directory.GetCurrentDirectory();
+
+    return new[]
+    {
+        Path.Combine(baseDir, "..", "..", "configuration", "pathfinder.yml"),
+        Path.Combine(baseDir, "configuration", "pathfinder.yml"),
+        Path.Combine(currentDir, "configuration", "pathfinder.yml"),
+        Path.Combine(currentDir, "..", "..", "configuration", "pathfinder.yml"),
+        @"C:\dev\NosCore.PathFinder\configuration\pathfinder.yml"
+    };
 }
 
 record WsRequest(int MapId, short X, short Y, short MaxDistance = 22, double StopDistance = 0, string? Heuristic = null);

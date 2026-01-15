@@ -6,11 +6,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Heuristic;
+using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing.Processing;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace NosCore.PathFinder.Tests
 {
@@ -26,36 +30,48 @@ namespace NosCore.PathFinder.Tests
             var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
             var flowField = brushFire.GetFlowField(_map);
 
-            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
-            var listPixel = new List<Color>();
-            TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, (0, 0), characterPosition);
-            using var graphics = Graphics.FromImage(bitmap);
+            using var image = new Image<Rgba32>(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
+            var listPixel = new List<Rgba32>();
+            TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, image, (0, 0), characterPosition);
+
+            image.Mutate(ctx =>
+            {
+                for (short y = 0; y < _map.Height; y++)
+                {
+                    for (short x = 0; x < _map.Width; x++)
+                    {
+                        var rect = new RectangleF(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
+                        if ((x, y) != characterPosition)
+                        {
+                            if (brushFire[x, y] != null)
+                            {
+                                ctx.Fill(Color.White, rect);
+                                var alpha = (byte)((brushFire[x, y] * 12 > 255 ? 255 : (brushFire[x, y] ?? 0) * 12));
+                                var color = new Rgba32(0, 0, 255, alpha);
+                                ctx.Fill(color, rect);
+                                listPixel.Add(color);
+                            }
+                        }
+                    }
+                }
+            });
 
             for (short y = 0; y < _map.Height; y++)
             {
                 for (short x = 0; x < _map.Width; x++)
                 {
-                    var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
-                    if ((x, y) != characterPosition)
+                    if ((x, y) != characterPosition && brushFire[x, y] != null)
                     {
-                        if (brushFire[x, y] != null)
+                        var vector = flowField[x, y];
+                        if (vector != null)
                         {
-                            graphics.FillRectangle(new Pen(Color.White).Brush, rectangle);
-                            var color = Color.FromArgb((int)((brushFire[x, y] * 12 > 255 ? 255 : (brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
-                            graphics.FillRectangle(new Pen(color).Brush, rectangle);
-                            listPixel.Add(color);
-
-                            var vector = flowField[x, y];
-                            if (vector != null)
-                            {
-                                TestHelper.DrawArrow(graphics, x, y, vector.Value.X, vector.Value.Y, TestHelper.Scale, Color.White);
-                            }
+                            TestHelper.DrawArrow(image, x, y, vector.Value.X, vector.Value.Y, TestHelper.Scale, Color.White.ToPixel<Rgba32>());
                         }
                     }
                 }
             }
 
-            TestHelper.VerifyFile("flow-field.png", bitmap, listPixel, "Flow Field (Vector Field Pathfinding)");
+            TestHelper.VerifyFile("flow-field.png", image, listPixel, "Flow Field (Vector Field Pathfinding)");
         }
 
         [TestMethod]
@@ -69,50 +85,72 @@ namespace NosCore.PathFinder.Tests
 
             var path = TraceFlowFieldPath(flowField, monsterPosition, characterPosition);
 
-            var bitmap = new Bitmap(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
-            var listPixel = new List<Color>();
-            TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, bitmap, monsterPosition, characterPosition);
-            using var graphics = Graphics.FromImage(bitmap);
+            using var image = new Image<Rgba32>(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
+            var listPixel = new List<Rgba32>();
+            TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, image, monsterPosition, characterPosition);
+            var font = TestHelper.GetFont();
+
+            image.Mutate(ctx =>
+            {
+                for (short y = 0; y < _map.Height; y++)
+                {
+                    for (short x = 0; x < _map.Width; x++)
+                    {
+                        var rect = new RectangleF(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
+                        if ((x, y) != characterPosition && (x, y) != monsterPosition)
+                        {
+                            if (brushFire[x, y] != null)
+                            {
+                                ctx.Fill(Color.White, rect);
+                                var alpha = (byte)((brushFire[x, y] * 12 > 255 ? 255 : (brushFire[x, y] ?? 0) * 12));
+                                var color = new Rgba32(0, 0, 255, alpha);
+                                ctx.Fill(color, rect);
+                                listPixel.Add(color);
+                            }
+                        }
+                    }
+                }
+            });
 
             for (short y = 0; y < _map.Height; y++)
             {
                 for (short x = 0; x < _map.Width; x++)
                 {
-                    var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
-                    if ((x, y) != characterPosition && (x, y) != monsterPosition)
+                    if ((x, y) != characterPosition && (x, y) != monsterPosition && brushFire[x, y] != null)
                     {
-                        if (brushFire[x, y] != null)
+                        var vector = flowField[x, y];
+                        if (vector != null)
                         {
-                            graphics.FillRectangle(new Pen(Color.White).Brush, rectangle);
-                            var color = Color.FromArgb((int)((brushFire[x, y] * 12 > 255 ? 255 : (brushFire[x, y] ?? 0) * 12)), 0, 0, 255);
-                            graphics.FillRectangle(new Pen(color).Brush, rectangle);
-                            listPixel.Add(color);
-
-                            var vector = flowField[x, y];
-                            if (vector != null)
-                            {
-                                TestHelper.DrawArrow(graphics, x, y, vector.Value.X, vector.Value.Y, TestHelper.Scale, Color.White);
-                            }
+                            TestHelper.DrawArrow(image, x, y, vector.Value.X, vector.Value.Y, TestHelper.Scale, Color.White.ToPixel<Rgba32>());
                         }
                     }
                 }
             }
 
             var pathArray = path.ToArray();
-            for (var i = 0; i < pathArray.Length; i++)
+            image.Mutate(ctx =>
             {
-                var (x, y) = pathArray[i];
-                if ((x, y) != monsterPosition && (x, y) != characterPosition)
+                for (var i = 0; i < pathArray.Length; i++)
                 {
-                    var rectangle = new Rectangle(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
-                    var color = Color.LightPink;
-                    graphics.FillRectangle(new Pen(color).Brush, rectangle);
-                    graphics.DrawString(i.ToString(), new Font("Arial", 16), Brushes.Black, rectangle, TestHelper.StringFormat);
-                    listPixel.Add(color);
+                    var (x, y) = pathArray[i];
+                    if ((x, y) != monsterPosition && (x, y) != characterPosition)
+                    {
+                        var rect = new RectangleF(x * TestHelper.Scale, y * TestHelper.Scale, TestHelper.Scale, TestHelper.Scale);
+                        var color = Color.LightPink;
+                        ctx.Fill(color, rect);
+                        var textOptions = new RichTextOptions(font)
+                        {
+                            Origin = new PointF(x * TestHelper.Scale + TestHelper.Scale / 2f, y * TestHelper.Scale + TestHelper.Scale / 2f),
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center
+                        };
+                        ctx.DrawText(textOptions, i.ToString(), Color.Black);
+                        listPixel.Add(color.ToPixel<Rgba32>());
+                    }
                 }
-            }
+            });
 
-            TestHelper.VerifyFile("flow-field-path.png", bitmap, listPixel, "Flow Field Path (Monster following vectors to Player)");
+            TestHelper.VerifyFile("flow-field-path.png", image, listPixel, "Flow Field Path (Monster following vectors to Player)");
         }
 
         private static List<(short X, short Y)> TraceFlowFieldPath(FlowField flowField, (short X, short Y) start, (short X, short Y) target, int maxSteps = 100)
