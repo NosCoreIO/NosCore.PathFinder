@@ -36,8 +36,20 @@ namespace NosCore.PathFinder.Tests
     {
         private const string FontSpec = "sans 16";
 
+        private static readonly Lazy<bool> FontAvailable = new(() =>
+        {
+            try
+            {
+                using var probe = Image.Text("0", font: FontSpec, dpi: 72);
+                return true;
+            }
+            catch (VipsException)
+            {
+                return false;
+            }
+        });
+
         private readonly byte[] _pixels;
-        private static bool _fontUnavailable;
 
         public MapCanvas(int width, int height)
         {
@@ -113,47 +125,29 @@ namespace NosCore.PathFinder.Tests
 
         public void DrawTextCentered(float centerX, float centerY, string text, Rgba color)
         {
-            if (_fontUnavailable || string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text) || !FontAvailable.Value)
             {
                 return;
             }
 
-            Image glyphs;
-            try
-            {
-                glyphs = Image.Text(text, font: FontSpec, dpi: 72);
-            }
-            catch (VipsException)
-            {
-                _fontUnavailable = true;
-                return;
-            }
+            using var glyphs = Image.Text(text, font: FontSpec, dpi: 72);
+            var mask = glyphs.WriteToMemory<byte>();
+            var originX = (int)MathF.Round(centerX - glyphs.Width / 2f);
+            var originY = (int)MathF.Round(centerY - glyphs.Height / 2f);
 
-            using (glyphs)
+            for (var gy = 0; gy < glyphs.Height; gy++)
             {
-                var mask = glyphs.WriteToMemory<byte>();
-                var originX = (int)MathF.Round(centerX - glyphs.Width / 2f);
-                var originY = (int)MathF.Round(centerY - glyphs.Height / 2f);
-
-                for (var gy = 0; gy < glyphs.Height; gy++)
+                for (var gx = 0; gx < glyphs.Width; gx++)
                 {
-                    for (var gx = 0; gx < glyphs.Width; gx++)
+                    var coverage = mask[gy * glyphs.Width + gx];
+                    var px = originX + gx;
+                    var py = originY + gy;
+                    if (coverage == 0 || px < 0 || py < 0 || px >= Width || py >= Height)
                     {
-                        var coverage = mask[gy * glyphs.Width + gx];
-                        if (coverage == 0)
-                        {
-                            continue;
-                        }
-
-                        var px = originX + gx;
-                        var py = originY + gy;
-                        if (px < 0 || py < 0 || px >= Width || py >= Height)
-                        {
-                            continue;
-                        }
-
-                        Blend(px, py, color, (byte)(color.A * coverage / 255));
+                        continue;
                     }
+
+                    Blend(px, py, color, (byte)(color.A * coverage / 255));
                 }
             }
         }
