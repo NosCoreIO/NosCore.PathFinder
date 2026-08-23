@@ -5,3 +5,12 @@ updates:
   schedule:
     interval: daily
   open-pull-requests-limit: 10
+  ignore:
+    # ImageSharp 4 / Drawing 3 fail the Release build without a purchased
+    # Six Labors license, so a major bump can never go green here.
+  - dependency-name: SixLabors.ImageSharp
+    update-types: [version-update:semver-major]
+  - dependency-name: SixLabors.ImageSharp.Drawing
+    update-types: [version-update:semver-major]
+  - dependency-name: SixLabors.Fonts
+    update-types: [version-update:semver-major]
