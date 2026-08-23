@@ -22,7 +22,7 @@ namespace NosCore.PathFinder.Tests
         {
             (short X, short Y) characterPosition = (6, 10);
             var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
-            using var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
+            var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             var listPixel = new List<Rgba>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, image, (0, 0), characterPosition);
 

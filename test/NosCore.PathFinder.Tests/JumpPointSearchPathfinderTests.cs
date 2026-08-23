@@ -30,7 +30,7 @@ namespace NosCore.PathFinder.Tests
         [TestMethod]
         public void Test_JumpPointSearchPathfinder()
         {
-            using var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
+            var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             (short X, short Y) target = (15, 16);
             var listPixel = new List<Rgba>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, image, target, _characterPosition);

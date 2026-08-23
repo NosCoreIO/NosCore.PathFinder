@@ -32,7 +32,7 @@ namespace NosCore.PathFinder.Tests
     /// axis-aligned and trivial; libvips is used for the two parts that genuinely need
     /// a library, glyph rasterisation and PNG encoding.
     /// </summary>
-    public sealed class MapCanvas : IDisposable
+    public sealed class MapCanvas
     {
         private const string FontSpec = "sans 16";
 
@@ -163,10 +163,6 @@ namespace NosCore.PathFinder.Tests
             using var image = Image.NewFromMemory(_pixels, Width, Height, 4, Enums.BandFormat.Uchar)
                 .Copy(interpretation: Enums.Interpretation.Srgb);
             image.WriteToFile(path);
-        }
-
-        public void Dispose()
-        {
         }
 
         private void Blend(int x, int y, Rgba source, byte sourceAlpha)

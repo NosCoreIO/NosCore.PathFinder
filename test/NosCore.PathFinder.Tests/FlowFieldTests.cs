@@ -25,7 +25,7 @@ namespace NosCore.PathFinder.Tests
             var brushFire = _map.LoadBrushFire(characterPosition, new OctileDistanceHeuristic());
             var flowField = brushFire.GetFlowField(_map);
 
-            using var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
+            var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             var listPixel = new List<Rgba>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, image, (0, 0), characterPosition);
 
@@ -73,7 +73,7 @@ namespace NosCore.PathFinder.Tests
 
             var path = TraceFlowFieldPath(flowField, monsterPosition, characterPosition);
 
-            using var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
+            var image = new MapCanvas(_map.Width * TestHelper.Scale, _map.Height * TestHelper.Scale);
             var listPixel = new List<Rgba>();
             TestHelper.DrawMap(_map, TestHelper.Scale, listPixel, image, monsterPosition, characterPosition);
 
