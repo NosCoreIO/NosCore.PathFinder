@@ -53,5 +53,51 @@ namespace NosCore.PathFinder.Tests
 
             TestHelper.VerifyFile("jump-point-search-pathfinder.png", image, listPixel, "Jump Point Search Pathfinder (break at walls)");
         }
+
+        [TestMethod]
+        public void ACachedPathStartsOnTheFirstStepLikeAFreshOne()
+        {
+            var pathfinder = new JumpPointSearchPathfinder(Walled(new[]
+            {
+                new byte[] { 0, 0, 0, 0, 0, 0 },
+            }), new OctileDistanceHeuristic());
+            var fresh = pathfinder.FindPath((1, 1), (6, 1)).ToList();
+
+            var cached = pathfinder.FindPath(fresh[0], (6, 1)).ToList();
+
+            CollectionAssert.AreEqual(fresh.Skip(1).ToList(), cached);
+        }
+
+        [TestMethod]
+        public void TwoMapsDoNotShareCachedPaths()
+        {
+            var open = new JumpPointSearchPathfinder(Walled(new[]
+            {
+                new byte[] { 0, 0, 0, 0, 0 },
+                new byte[] { 0, 0, 0, 0, 0 },
+            }), new OctileDistanceHeuristic());
+            var blocked = new JumpPointSearchPathfinder(Walled(new[]
+            {
+                new byte[] { 0, 0, 1, 0, 0 },
+                new byte[] { 0, 0, 0, 0, 0 },
+            }), new OctileDistanceHeuristic());
+
+            var straight = open.FindPath((1, 1), (5, 1)).ToList();
+            var around = blocked.FindPath(straight[0], (5, 1)).ToList();
+
+            Assert.Contains(((short)3, (short)1), straight);
+            Assert.DoesNotContain(((short)3, (short)1), around, "the blocked map must not reuse the open map's path through its wall");
+            Assert.AreEqual(((short)5, (short)1), around.Last());
+        }
+
+        private static TestMap Walled(byte[][] inside)
+        {
+            var width = inside[0].Length + 2;
+            var wall = Enumerable.Repeat((byte)1, width).ToArray();
+            return new TestMap(new[] { wall }
+                .Concat(inside.Select(row => new byte[] { 1 }.Concat(row).Append((byte)1).ToArray()))
+                .Append(wall)
+                .ToArray());
+        }
     }
 }
