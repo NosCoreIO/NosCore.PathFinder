@@ -27,7 +27,7 @@ namespace NosCore.PathFinder.Pathfinder
 
         public GoalBasedPathfinder(IMapGrid mapGrid, IHeuristic heuristic, BrushFire brushfire) : this(mapGrid, heuristic)
         {
-            BrushFirecache.Set(brushfire.Origin, brushfire, DateTimeOffset.Now.AddSeconds(10));
+            BrushFirecache.Set((mapGrid, brushfire.Origin), brushfire, DateTimeOffset.Now.AddSeconds(10));
         }
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
@@ -39,10 +39,10 @@ namespace NosCore.PathFinder.Pathfinder
                 return list;
             }
 
-            if (!BrushFirecache.TryGetValue(end, out BrushFire brushFire))
+            if (!BrushFirecache.TryGetValue((_mapGrid, end), out BrushFire brushFire))
             {
                 brushFire = _mapGrid.LoadBrushFire(end, _heuristic);
-                BrushFirecache.Set(end, brushFire, DateTimeOffset.Now.AddSeconds(10));
+                BrushFirecache.Set((_mapGrid, end), brushFire, DateTimeOffset.Now.AddSeconds(10));
             }
 
             if (!brushFire.Distances.ContainsKey(start))

@@ -59,7 +59,8 @@ namespace NosCore.PathFinder.Pathfinder
 
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
-            if (Cache.TryGetValue((start, end), out IEnumerable<(short X, short Y)>? cachedList))
+            // Keyed by grid too: the cache is shared by every pathfinder instance, one per map.
+            if (Cache.TryGetValue((_mapGrid, start, end), out IEnumerable<(short X, short Y)>? cachedList))
             {
                 return cachedList ?? Array.Empty<(short X, short Y)>();
             }
@@ -67,7 +68,7 @@ namespace NosCore.PathFinder.Pathfinder
             var path = BuildFullPath(GetJumpList(start, end).ToList());
             for (var i = 0; i < path.Count; i++)
             {
-                Cache.Set((path[i], end), path.Skip(i), DateTimeOffset.Now.AddSeconds(10));
+                Cache.Set((_mapGrid, path[i], end), path.Skip(i + 1), DateTimeOffset.Now.AddSeconds(10));
             }
             return path;
         }
