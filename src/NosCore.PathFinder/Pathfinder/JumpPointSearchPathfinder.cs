@@ -68,7 +68,7 @@ namespace NosCore.PathFinder.Pathfinder
             var path = BuildFullPath(GetJumpList(start, end).ToList());
             for (var i = 0; i < path.Count; i++)
             {
-                Cache.Set((_mapGrid, path[i], end), path.Skip(i + 1), DateTimeOffset.Now.AddSeconds(10));
+                Cache.Set((_mapGrid, path[i], end), path.Skip(i + 1), TimeSpan.FromSeconds(10));
             }
             return path;
         }
