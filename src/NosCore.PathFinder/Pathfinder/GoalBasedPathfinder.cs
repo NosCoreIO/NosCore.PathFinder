@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Caching.Memory;
 using NosCore.PathFinder.Brushfire;
 using NosCore.PathFinder.Interfaces;
@@ -30,11 +29,16 @@ namespace NosCore.PathFinder.Pathfinder
             BrushFirecache.Set((mapGrid, brushfire.Origin), brushfire, TimeSpan.FromSeconds(10));
         }
 
+        /// <summary>
+        /// The cells to walk from <paramref name="start"/> (excluded) to <paramref name="end"/> (included), following the
+        /// brushfire around the goal. Empty when start equals end, when either is outside the map or unwalkable, when no
+        /// path links them, or when the start is beyond the brushfire's reach.
+        /// </summary>
         public IEnumerable<(short X, short Y)> FindPath((short X, short Y) start, (short X, short Y) end)
         {
             var list = new List<(short X, short Y)>();
 
-            if (!_mapGrid.IsWalkable(start.X, start.Y) || !_mapGrid.IsWalkable(end.X, end.Y))
+            if (start == end || !_mapGrid.IsReachable(start, end))
             {
                 return list;
             }
@@ -45,29 +49,32 @@ namespace NosCore.PathFinder.Pathfinder
                 BrushFirecache.Set((_mapGrid, end), brushFire, TimeSpan.FromSeconds(10));
             }
 
-            if (!brushFire.Distances.ContainsKey(start))
+            if (!brushFire.Distances.TryGetValue(start, out var currentDistance))
             {
                 return list;
             }
 
+            // Brushfire distances are exact, so each step strictly lowers the distance and the walk cannot loop.
             var current = start;
-            var visited = new HashSet<(short X, short Y)> { current };
-
             while (current != end)
             {
                 var bestNeighbor = current;
-                var bestDistance = brushFire.Distances.TryGetValue(current, out var currentDist) ? currentDist : double.MaxValue;
+                var bestDistance = currentDistance;
 
-                foreach (var neighbor in _mapGrid.GetNeighbors(current))
+                for (var direction = 0; direction < GridMoves.Count; direction++)
                 {
-                    if (visited.Contains(neighbor))
+                    var dx = GridMoves.Dx[direction];
+                    var dy = GridMoves.Dy[direction];
+                    if (!GridMoves.CanStep(_mapGrid, current.X, current.Y, dx, dy))
                     {
                         continue;
                     }
 
+                    (short X, short Y) neighbor = ((short)(current.X + dx), (short)(current.Y + dy));
                     if (neighbor == end)
                     {
                         bestNeighbor = neighbor;
+                        bestDistance = 0;
                         break;
                     }
 
@@ -84,7 +91,7 @@ namespace NosCore.PathFinder.Pathfinder
                 }
 
                 current = bestNeighbor;
-                visited.Add(current);
+                currentDistance = bestDistance;
                 list.Add(current);
             }
 
