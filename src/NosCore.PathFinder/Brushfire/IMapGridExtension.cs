@@ -1,4 +1,4 @@
-﻿//  __  _  __    __   ___ __  ___ ___
+//  __  _  __    __   ___ __  ___ ___
 // |  \| |/__\ /' _/ / _//__\| _ \ __|
 // | | ' | \/ |`._`.| \_| \/ | v / _|
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
@@ -20,6 +20,11 @@ namespace NosCore.PathFinder.Brushfire
             (-1, 1),  (0, 1),  (1, 1)
         };
 
+        /// <summary>
+        /// Cells one step away from <paramref name="cell"/>. Unless <paramref name="includeWalls"/> is set, only
+        /// walkable cells are returned and a diagonal step needs one of the two orthogonal cells it passes to be
+        /// walkable, so nothing squeezes between two walls that touch by a corner.
+        /// </summary>
         public static IEnumerable<(short X, short Y)> GetNeighbors(this IMapGrid grid, (short X, short Y) cell, bool includeWalls = false)
         {
             for (int i = 0; i < Neighbours.Count; i++)
@@ -29,11 +34,22 @@ namespace NosCore.PathFinder.Brushfire
                 var currentY = (short)(cell.Y + delta.Y);
                 if (currentX >= 0 && currentX < grid.Width &&
                     currentY >= 0 && currentY < grid.Height &&
-                    (includeWalls || grid.IsWalkable(currentX, currentY)))
+                    (includeWalls || GridMoves.CanStep(grid, cell.X, cell.Y, delta.X, delta.Y)))
                 {
                     yield return (currentX, currentY);
                 }
             }
+        }
+
+        /// <summary>
+        /// Whether a walkable path links <paramref name="start"/> to <paramref name="end"/>. The connected areas of the
+        /// grid are labelled once and cached, so this answers in constant time and lets callers skip a search that can
+        /// only fail. Assumes the grid's walkability does not change while it is cached (10 seconds).
+        /// </summary>
+        public static bool IsReachable(this IMapGrid grid, (short X, short Y) start, (short X, short Y) end)
+        {
+            return GridMoves.IsWalkable(grid, start.X, start.Y) && GridMoves.IsWalkable(grid, end.X, end.Y) &&
+                MapConnectivity.For(grid).AreConnected(start.X, start.Y, end.X, end.Y);
         }
 
         public static BrushFire LoadBrushFire(this IMapGrid mapGrid, (short X, short Y) user, IHeuristic heuristic, short maxDistance = 22)
@@ -60,8 +76,16 @@ namespace NosCore.PathFinder.Brushfire
                     continue;
                 }
 
-                foreach (var neighborPos in mapGrid.GetNeighbors(cellPos))
+                for (var direction = 0; direction < GridMoves.Count; direction++)
                 {
+                    var dx = GridMoves.Dx[direction];
+                    var dy = GridMoves.Dy[direction];
+                    if (!GridMoves.CanStep(mapGrid, cell.X, cell.Y, dx, dy))
+                    {
+                        continue;
+                    }
+
+                    (short X, short Y) neighborPos = ((short)(cell.X + dx), (short)(cell.Y + dy));
                     var distance = heuristic.GetDistance(neighborPos, cellPos) + cell.D;
                     if (distance > maxDistance)
                     {
