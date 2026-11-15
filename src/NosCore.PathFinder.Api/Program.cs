@@ -24,6 +24,11 @@ using YamlDotNet.Serialization.NamingConventions;
 using Logger = NosCore.Shared.I18N.Logger;
 
 var pathfinderConfig = LoadPathfinderConfig();
+if (pathfinderConfig?.Language is { Length: > 0 } language)
+{
+    CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(language);
+    CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentUICulture;
+}
 Logger.PrintHeader("PATHFINDER API - NosCoreIO");
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,7 +63,7 @@ else
 var app = builder.Build();
 
 var logLanguage = app.Services.GetRequiredService<ILogLanguageLocalizer<LogLanguageKey>>();
-Log.Information(logLanguage[LogLanguageKey.LANGUAGE_LOADED], CultureInfo.CurrentCulture.Name);
+Log.Information(logLanguage[LogLanguageKey.LANGUAGE_LOADED], CultureInfo.CurrentUICulture.Name);
 
 if (!string.IsNullOrEmpty(connectionString))
 {
