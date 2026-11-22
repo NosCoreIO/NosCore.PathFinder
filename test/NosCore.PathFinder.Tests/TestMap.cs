@@ -25,7 +25,8 @@ namespace NosCore.PathFinder.Tests
 
         public bool IsWalkable(short currentX, short currentY)
         {
-            return _data[currentY][currentX] == 0;
+            return currentX >= 0 && currentX < Width && currentY >= 0 && currentY < Height
+                && _data[currentY][currentX] == 0;
         }
     }
 }
