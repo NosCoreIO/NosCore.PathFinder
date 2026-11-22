@@ -500,3 +500,5 @@ fabric.properties
 /build/net*.*
 
 /documentation/*.received.md
+# BenchmarkDotNet results
+BenchmarkDotNet.Artifacts/

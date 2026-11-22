@@ -4,7 +4,7 @@
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
 // -----------------------------------
 
-using System;
+using BenchmarkDotNet.Running;
 
 namespace NosCore.PathFinder.Benchmark
 {
@@ -12,7 +12,7 @@ namespace NosCore.PathFinder.Benchmark
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
     }
 }
